@@ -3,8 +3,9 @@
 A new Flutter project.
 
 # Authors
--Hembert Dorian : HembertD 
--Laurence Maxence : MaxenceLAURENCE
+- HEMBERT Dorian : [HembertD](https://github.com/HembertD)  
+- LAURENCE Maxence : [MaxenceLAURENCE](https://github.com/MaxenceLAURENCE)  
+- LEVITRE Mathys : [LevitreMathys](https://github.com/LevitreMathys)
 
 ## Getting Started
 
