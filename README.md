@@ -3,7 +3,8 @@
 A new Flutter project.
 
 # Authors
--Hembert Dorian : HembertD
+-Hembert Dorian : HembertD 
+-Laurence Maxence : MaxenceLAURENCE
 
 ## Getting Started
 
