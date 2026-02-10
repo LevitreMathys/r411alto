@@ -2,6 +2,9 @@
 
 A new Flutter project.
 
+# Authors
+-Hembert Dorian : HembertD
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
