@@ -1,41 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:r411alto/providers/activated_buttons_provider.dart';
 import 'package:r411alto/widgets/common/AddButtons.dart';
 import 'package:r411alto/widgets/common/FloatingBar.dart';
 
-class App extends StatelessWidget {
 
+class App extends ConsumerWidget {
   final Widget body;
-
-  const App({
-    super.key,
-    required this.body,
-  });
+  const App({super.key, required this.body});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showAddButtons = ref.watch(activatedButtonsNotifier).isActivated;
+
     return Scaffold(
       extendBody: true,
       body: Stack(
         children: [
+
+
+
           body,
 
-          // Background
-          Positioned(
-            bottom: 0,
-            left: 0,
-            child:
-            IgnorePointer(child:
-            Image(
-                image: AssetImage(
-                    "assets/images/Group14.png"
-                )
-            )
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: IgnorePointer(
+                child: Image.asset(
+                  "assets/images/Group14.png",
+                  width: MediaQuery.of(context).size.width,
+                  fit: BoxFit.cover, // ou BoxFit.contain selon le rendu voulu
+                ),
+              ),
             ),
           ),
 
-          AddButtons(),
+          if (showAddButtons) AddButtons(),
 
-          // Barre de navigation flottante
+
           Positioned(
             bottom: 20,
             left: 20,
@@ -44,7 +46,6 @@ class App extends StatelessWidget {
               child: FloatingBar(),
             ),
           ),
-
         ],
       ),
     );
