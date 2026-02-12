@@ -61,20 +61,7 @@ class QRCodeScreen extends StatelessWidget {
                 fontSize: 16,
                 color: Colors.grey,
               ),
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton.icon(
-              onPressed: () {
-                context.push('/scan-qr-code');
-              },
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const Text("Scanner un QR Code"),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                backgroundColor: const Color(0xFF6366F1),
-                foregroundColor: Colors.white,
-              ),
-            ),
+            )
           ],
         ),
       ),
