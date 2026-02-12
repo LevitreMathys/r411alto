@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:r411alto/widgets/common/NavItem.dart';
 
 class FloatingBar extends StatefulWidget {
@@ -42,9 +43,25 @@ class _FloatinBar extends State<FloatingBar> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly, // espace équitablement les item de la navbar
             children: [
               NavItem(icon: Icons.message_outlined, name: "message"),
-              IconButton(icon: Icon(Icons.add), onPressed: changeState,),
-              NavItem(icon: Icons.house, name: "home"),
-              NavItem(icon: Icons.account_circle, name: "profil"),
+              GestureDetector(
+                onTap: () {
+                  // Navigate to QR code generation screen using go_router
+                  context.push('/qr-code');
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF6366F1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+              NavItem(icon: Icons.account_circle, name: "profile"),
             ],
           ),
         ),
