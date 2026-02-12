@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:r411alto/HomeScreen.dart';
+import 'package:flutter/services.dart';
+import 'package:r411alto/screens/home_screen.dart';
 
 void main() {
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.immersiveSticky,
+  );
+
   runApp(const MyApp());
 }
 
