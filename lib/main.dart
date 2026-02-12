@@ -8,6 +8,8 @@ import 'screens/first_screen.dart';
 import 'screens/account_created_screen.dart';
 import 'screens/main_form_screen.dart';
 import 'screens/profil_setting_screen.dart';
+import 'screens/QR_code_screen.dart';
+import 'screens/scan_qr_code_screen.dart';
 
 void main() {
 
@@ -54,6 +56,18 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/account-created',
       builder: (context, state) => const AccountCreatedScreen(),
+    ),
+    GoRoute(
+      path: '/qr-code',
+      builder: (BuildContext context, GoRouterState state) {
+        return const QRCodeScreen();
+      },
+    ),
+    GoRoute(
+      path: '/scan-qr-code',
+      builder: (BuildContext context, GoRouterState state) {
+        return const ScanQRCodeScreen();
+      },
     ),
   ],
 );
