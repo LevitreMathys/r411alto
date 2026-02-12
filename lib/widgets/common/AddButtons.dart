@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:r411alto/widgets/common/NavItem.dart';
 
 class AddButtons extends StatelessWidget {
@@ -38,7 +39,9 @@ class AddButtons extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly, // espace équitablement les item de la navbar
                 children: [
                   TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.push("/qr-code");
+                      },
                       child: Text("Créer une connexion")
                   )
                 ],
@@ -47,7 +50,9 @@ class AddButtons extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly, // espace équitablement les item de la navbar
                 children: [
                   TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.push("/scan-qr-code");
+                      },
                       child: Text("Scanner un QR Code")
                   )
                 ],
