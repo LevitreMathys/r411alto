@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:r411alto/widgets/common/FloatingBar.dart';
 
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.title});
+class MainFormScreen extends StatefulWidget {
+  const MainFormScreen({super.key, required this.title});
 
   final String title;
 
   @override
-  State<HomeScreen> createState() => _HomeScreen();
+  State<MainFormScreen> createState() => _MainFormScreen();
 }
 
-class _HomeScreen extends State<HomeScreen> {
+class _MainFormScreen extends State<MainFormScreen> {
 
 
   @override
@@ -22,34 +22,6 @@ class _HomeScreen extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
         children: [
-
-          // Text centré
-          Center(
-            child: Text(
-                "Aucune connexion établie"
-            ),
-          ),
-
-          Positioned(
-            bottom: 0,
-            left: 0,
-            child:
-            IgnorePointer(child:
-            Image(
-                image: AssetImage(
-                    "assets/images/Group14.png"
-                )
-            )
-            ),
-          ),
-
-
-
-
-          FloatingBar()
-
-
-
 
         ],
       ),

@@ -2,8 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:r411alto/widgets/common/NavItem.dart';
 
-class FloatingBar extends StatelessWidget {
-  const FloatingBar({super.key});
+class FloatingBar extends StatefulWidget {
+
+  const FloatingBar({
+    super.key,
+  });
+
+  @override
+  State<FloatingBar> createState() => _FloatinBar();
+}
+
+class _FloatinBar extends State<FloatingBar> {
+
+  bool addIsActivated = false;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +68,12 @@ class FloatingBar extends StatelessWidget {
       ),
     );
 
-
   }
+
+  void changeState() {
+    this.addIsActivated = !this.addIsActivated;
+  }
+
+  
 
 }

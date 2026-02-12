@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:r411alto/App.dart';
 import 'screens/home_screen.dart';
 import 'screens/first_screen.dart';
 import 'screens/account_created_screen.dart';
@@ -21,36 +22,39 @@ void main() {
 }
 
 final GoRouter _router = GoRouter(
-  routes: <RouteBase>[
-    GoRoute(
-      path: '/',
-      builder: (BuildContext context, GoRouterState state) {
-        return const HomeScreen(title: 'HomeScreen',);
+  routes: [
+    ShellRoute(
+      builder: (context, state, child) {
+        return App(body: child);
       },
+      routes: [
+
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const HomeScreen(title: 'Home'),
+        ),
+
+        GoRoute(
+          path: '/main-form',
+          builder: (context, state) => const MainFormScreen(),
+        ),
+
+        GoRoute(
+          path: '/profil-setting',
+          builder: (context, state) => const ProfilSettingScreen(),
+        ),
+      ],
     ),
+
+    // écrans hors menu
     GoRoute(
       path: '/first-screen',
-      builder: (BuildContext context, GoRouterState state) {
-        return const FirstScreen();
-      },
+      builder: (context, state) => const FirstScreen(),
     ),
+
     GoRoute(
       path: '/account-created',
-      builder: (BuildContext context, GoRouterState state) {
-        return const AccountCreatedScreen();
-      },
-    ),
-    GoRoute(
-      path: '/main-form',
-      builder: (BuildContext context, GoRouterState state) {
-        return const MainFormScreen();
-      },
-    ),
-    GoRoute(
-      path: '/profil-setting',
-      builder: (BuildContext context, GoRouterState state) {
-        return const ProfilSettingScreen();
-      },
+      builder: (context, state) => const AccountCreatedScreen(),
     ),
     GoRoute(
       path: '/qr-code',
@@ -66,6 +70,8 @@ final GoRouter _router = GoRouter(
     ),
   ],
 );
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
