@@ -10,6 +10,7 @@ import 'screens/main_form_screen.dart';
 import 'screens/profil_setting_screen.dart';
 import 'screens/QR_code_screen.dart';
 import 'screens/scan_qr_code_screen.dart';
+import 'screens/easter_egg.dart';
 
 void main() {
 
@@ -67,6 +68,12 @@ final GoRouter _router = GoRouter(
       path: '/scan-qr-code',
       builder: (BuildContext context, GoRouterState state) {
         return const ScanQRCodeScreen();
+      },
+    ),
+    GoRoute(
+      path: '/easter-egg',
+      builder: (BuildContext context, GoRouterState state) {
+        return const EasterEgg();
       },
     ),
   ],
