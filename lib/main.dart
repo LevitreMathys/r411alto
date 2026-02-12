@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:r411alto/App.dart';
 import 'screens/home_screen.dart';
@@ -16,7 +17,7 @@ void main() {
     SystemUiMode.immersiveSticky,
   );
 
-  runApp(const MyApp());
+  runApp(ProviderScope(child: MyApp()));
 }
 
 final GoRouter _router = GoRouter(
