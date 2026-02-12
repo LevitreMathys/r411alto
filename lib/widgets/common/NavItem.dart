@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class NavItem extends StatelessWidget {
 
@@ -17,14 +18,21 @@ class NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: fonctionOnPressed,
+      onPressed: () => {
+        ChangeScreen(context)
+      },
       icon: Icon(this.icon),
-
     );
   }
 
-  void fonctionOnPressed() {
-    print("Button ${this.name} pressed");
+  void ChangeScreen(BuildContext context) {
+    switch (this.name) {
+
+      case "home":
+        context.go("/");
+      case "profil":
+        context.go("/profil-setting");
+    }
   }
 
 }

@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:r411alto/widgets/common/NavItem.dart';
 
-class FloatingBar extends StatelessWidget {
-  const FloatingBar({super.key});
+class FloatingBar extends StatefulWidget {
+
+  const FloatingBar({
+    super.key,
+  });
+
+  @override
+  State<FloatingBar> createState() => _FloatinBar();
+}
+
+class _FloatinBar extends State<FloatingBar> {
+
+  bool addIsActivated = false;
 
   @override
   Widget build(BuildContext context) {
@@ -31,15 +42,21 @@ class FloatingBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly, // espace équitablement les item de la navbar
             children: [
               NavItem(icon: Icons.message_outlined, name: "message"),
-              NavItem(icon: Icons.add, name: "add"),
-              NavItem(icon: Icons.account_circle, name: "profile"),
+              IconButton(icon: Icon(Icons.add), onPressed: changeState,),
+              NavItem(icon: Icons.house, name: "home"),
+              NavItem(icon: Icons.account_circle, name: "profil"),
             ],
           ),
         ),
       ),
     );
 
-
   }
+
+  void changeState() {
+    this.addIsActivated = !this.addIsActivated;
+  }
+
+  
 
 }

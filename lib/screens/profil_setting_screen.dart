@@ -9,8 +9,15 @@ class ProfilSettingScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Profil Setting'),
       ),
-      body: const Center(
-        child: Text('Screen à compléter par Mathys'),
+      body: Column(
+        children: [
+
+          Positioned(
+
+              child: Icon(Icons.account_circle, size: 200),
+
+          ),
+        ],
       ),
     );
   }
