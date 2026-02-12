@@ -7,6 +7,13 @@ import 'screens/main_form_screen.dart';
 import 'screens/profil_setting_screen.dart';
 
 void main() {
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.immersiveSticky,
+  );
+
   runApp(const MyApp());
 }
 
@@ -57,6 +64,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
+      home: const HomeScreen(title: 'Home screen'),
     );
   }
 }
