@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:r411alto/App.dart';
+import 'package:r411alto/screens/settings_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/first_screen.dart';
 import 'screens/account_created_screen.dart';
@@ -37,6 +38,10 @@ final GoRouter _router = GoRouter(
         ),
 
 
+        GoRoute(
+          path: "/settings",
+          builder: (context, state) => const SettingsScreen(title: 'Settings'),
+        ),
 
         GoRoute(
           path: '/profil-setting',
