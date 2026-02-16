@@ -36,10 +36,7 @@ final GoRouter _router = GoRouter(
           builder: (context, state) => const HomeScreen(title: 'Home'),
         ),
 
-        GoRoute(
-          path: '/main-form',
-          builder: (context, state) => const MainFormScreen(),
-        ),
+
 
         GoRoute(
           path: '/profil-setting',
@@ -52,6 +49,11 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/first-screen',
       builder: (context, state) => const FirstScreen(),
+    ),
+
+    GoRoute(
+      path: '/sign-up',
+      builder: (context, state) => const MainFormScreen(),
     ),
 
     GoRoute(

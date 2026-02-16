@@ -38,11 +38,15 @@ dependencies:
   flutter_riverpod: ^3.2.1
   pretty_qr_code: ^3.6.0
   mobile_scanner: ^7.1.4
+  wave: ^0.2.2
+  calendar_date_picker2: ^2.0.1
   url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  intl: ^0.19.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -50,7 +54,18 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.3.0
   flutter_launcher_icons: ^0.13.1
+
+flutter_native_splash:
+  color: "#000000"            # couleur de fond si ton image ne remplit pas tout
+  image: assets/images/BgLauncher.png  # ton image full screen
+  android: true
+  ios: true
+  android_gravity: center
+  ios_content_mode: scaleAspectFill
+  fullscreen: true             # pour que l'image prenne tout l'écran
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -97,5 +112,5 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icon/launch_icon.png"
+  image_path: "assets/icon/launcher_icon.png"
 

@@ -6,12 +6,14 @@ class NavItem extends StatelessWidget {
 
   final IconData icon;
   final String name;
+  final double size;
 
   const NavItem(
       {
         super.key,
         required this.icon,
-        required this.name
+        required this.name,
+        required this.size,
       }
   );
 
@@ -22,6 +24,7 @@ class NavItem extends StatelessWidget {
         ChangeScreen(context)
       },
       icon: Icon(this.icon),
+      iconSize: this.size,
     );
   }
 
