@@ -23,7 +23,10 @@ class NavItem extends StatelessWidget {
       onPressed: () => {
         ChangeScreen(context)
       },
-      icon: Icon(this.icon),
+      icon: Icon(
+        this.icon,
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
       iconSize: this.size,
     );
   }
@@ -31,6 +34,8 @@ class NavItem extends StatelessWidget {
   void ChangeScreen(BuildContext context) {
     switch (this.name) {
 
+      case"message":
+        context.go("/first-screen");
       case "home":
         context.go("/");
       case "profil":

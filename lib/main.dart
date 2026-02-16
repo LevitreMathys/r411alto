@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:r411alto/App.dart';
 import 'package:r411alto/screens/settings_screen.dart';
+import 'package:r411alto/theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/first_screen.dart';
 import 'screens/account_created_screen.dart';
@@ -97,9 +98,9 @@ class MyApp extends StatelessWidget {
       routerConfig: _router,
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
     );
   }
 }

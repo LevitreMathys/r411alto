@@ -4,6 +4,7 @@ import 'package:r411alto/providers/activated_buttons_provider.dart';
 import 'package:r411alto/widgets/common/AddButtons.dart';
 import 'package:r411alto/widgets/common/FloatingBar.dart';
 import 'package:go_router/go_router.dart';
+import 'package:r411alto/widgets/common/HeaderHomeScreen.dart';
 
 
 class App extends ConsumerWidget {
@@ -14,12 +15,26 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final showAddButtons = ref.watch(activatedButtonsNotifier).isActivated;
 
+    final location = GoRouter.of(context).routerDelegate.currentConfiguration.uri.toString();
+    final isHome = location == "/";
+
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       extendBody: true,
       body: Stack(
         children: [
 
           body,
+
+          if(isHome)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Headerhomescreen(),
+            ),
+
+
 
           Positioned.fill(
             child: Align(
