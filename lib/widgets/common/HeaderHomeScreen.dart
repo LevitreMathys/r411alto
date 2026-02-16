@@ -52,7 +52,7 @@ class Headerhomescreen extends StatelessWidget {
               icon: Icon(Icons.settings),
               iconSize: 35,
               onPressed: () {
-                context.go("/first-screen");
+                context.go("/settings");
               },
             ),
           )
