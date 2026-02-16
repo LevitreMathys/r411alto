@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:r411alto/providers/activated_buttons_provider.dart';
 import 'package:r411alto/widgets/common/AddButtons.dart';
 import 'package:r411alto/widgets/common/FloatingBar.dart';
+import 'package:go_router/go_router.dart';
 
 
 class App extends ConsumerWidget {
@@ -62,6 +63,23 @@ class App extends ConsumerWidget {
 
           if (showAddButtons) AddButtons(),
 
+          // Small Easter Egg button in top right corner
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            right: 8,
+            child: SafeArea(
+              child: IconButton(
+                icon: const Icon(
+                  Icons.auto_awesome,
+                  size: 20,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  context.push("/easter-egg");
+                },
+              ),
+            ),
+          ),
 
           Positioned(
             bottom: 20,
