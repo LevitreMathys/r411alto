@@ -18,15 +18,40 @@ class App extends ConsumerWidget {
       body: Stack(
         children: [
 
-
-
           body,
 
           Positioned.fill(
             child: Align(
               alignment: Alignment.bottomLeft,
               child: IgnorePointer(
-                child: Image.asset(
+                child:
+                /*
+                WaveWidget(
+                  config: CustomConfig(
+                    colors: [
+                      Color(0xFF70136E),
+                      Color(0xFFC03DBE),
+                      Color(0xFFFA31F7),
+
+                    ],
+                    durations: [
+                      10000,
+                      10000,
+                      10000,
+                    ],
+                    heightPercentages: [
+                      1,
+                      1,
+                      1,
+                    ],
+
+
+                  ),
+                  backgroundColor: const Color(0xFFFFFFFF),
+                  size: const Size(double.infinity, double.infinity),
+                  waveAmplitude: 500,
+                ),*/
+                Image.asset(
                   "assets/images/Group14.png",
                   width: MediaQuery.of(context).size.width,
                   fit: BoxFit.cover, // ou BoxFit.contain selon le rendu voulu

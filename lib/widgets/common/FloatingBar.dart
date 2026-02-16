@@ -30,7 +30,7 @@ class _FloatingBarState extends ConsumerState<FloatingBar> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          NavItem(icon: Icons.message_outlined, name: "message"),
+          NavItem(icon: Icons.message_outlined, name: "message", size: 35,),
 
           // Bouton Add
           IconButton(
@@ -40,10 +40,11 @@ class _FloatingBarState extends ConsumerState<FloatingBar> {
               final current = ref.read(activatedButtonsNotifier).isActivated;
               notifier.setIsActivatedValue(!current);
             },
+            iconSize: 35,
           ),
 
-          NavItem(icon: Icons.house, name: "home"),
-          NavItem(icon: Icons.account_circle, name: "profil"),
+          NavItem(icon: Icons.house, name: "home", size: 35,),
+          NavItem(icon: Icons.account_circle, name: "profil", size: 35,),
         ],
       ),
     );

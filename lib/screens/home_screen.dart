@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:r411alto/widgets/common/HeaderHomeScreen.dart';
 import 'package:r411alto/widgets/common/AddButtons.dart';
 import 'package:r411alto/widgets/common/FloatingBar.dart';
 
@@ -20,7 +21,12 @@ class _HomeScreen extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
           children: [
-
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Headerhomescreen()
+            ),
             // Text centré
             Center(
               child: Text(
