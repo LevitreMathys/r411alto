@@ -1,8 +1,22 @@
-# Alto
+
+import TOCInline from '@theme/TOCInline';
+
+<h1>Alto</h1>
+<div class="header">
+<img src="./assets/icon/launcher_icon.png" width=100>
+
+
+</div>
+
+
+# Table des matières
+
+
+## [Authors](#authors)
 
 A new Flutter project.
 
-# Authors
+## [Authors
 - HEMBERT Dorian : [HembertD](https://github.com/HembertD)  
 - LAURENCE Maxence : [MaxenceLAURENCE](https://github.com/MaxenceLAURENCE)  
 - LEVITRE Mathys : [LevitreMathys](https://github.com/LevitreMathys)
@@ -20,3 +34,6 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 # r411alto
+
+# Qu'est-ce qu'Alto ?
+ Alto est un projet d'application mobile codé avec Flutter.

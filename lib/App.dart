@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:r411alto/providers/activated_buttons_provider.dart';
 import 'package:r411alto/widgets/common/AddButtons.dart';
 import 'package:r411alto/widgets/common/FloatingBar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:r411alto/widgets/common/HeaderHomeScreen.dart';
+import 'package:r411alto/widgets/common/PopUpAlert.dart';
 
 
 class App extends ConsumerWidget {
@@ -34,6 +36,19 @@ class App extends ConsumerWidget {
               child: Headerhomescreen(),
             ),
 
+/*
+          Positioned(
+            top: 10,
+            left: 10,
+            right: 10,
+            child: SafeArea(
+              child: PopUpAlert(
+                  isErr: false,
+                  content: "Erreur"
+              )
+            )
+          ),
+*/
 
 
           Positioned.fill(
@@ -76,6 +91,13 @@ class App extends ConsumerWidget {
             child: SafeArea(
               child: FloatingBar(),
             ),
+          )
+          .animate()
+          .slideY(
+            begin: 1,
+            end: 0,
+            duration: 400.ms,
+            curve: Curves.easeIn
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:r411alto/widgets/common/NavItem.dart';
 
@@ -70,6 +71,13 @@ class Headerhomescreen extends StatelessWidget {
         ],
       ),
 
+    )
+    .animate()
+    .slideY(
+      begin: -1,
+      end: 0,
+      duration: 400.ms,
+      curve: Curves.easeOut
     );
   }
 
