@@ -7,16 +7,37 @@ class ProfilSettingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil Setting'),
+        title: const Text('Profile Setting'),
       ),
       body: Column(
         children: [
-
-          Positioned(
-
-              child: Icon(Icons.account_circle, size: 200),
-
-          ),
+          Center(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.account_circle,
+                  size: 150,
+                ),
+                Row(
+                  children: [
+                    TextButton(
+                        onPressed: () {},
+                        child: ElevatedButton(
+                            onPressed: () {},
+                            child: Row(
+                              children: [
+                                Text("Edit profile"),
+                                SizedBox(width: 10,),
+                                Icon(Icons.edit)
+                              ],
+                            )
+                        ),
+                    )
+                  ],
+                )
+              ],
+            )
+          )
         ],
       ),
     );
