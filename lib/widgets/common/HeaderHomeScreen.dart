@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:r411alto/widgets/common/HeaderAccount.dart';
 import 'package:r411alto/widgets/common/NavItem.dart';
 
 class Headerhomescreen extends StatelessWidget {
@@ -35,28 +36,9 @@ class Headerhomescreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            child: TextButton(
-              onPressed: () {
-                context.go("/profil-setting");
-              },
-              child: Row(
-                children: [
-                  NavItem(
-                    icon: Icons.account_circle,
-                    name: "profil",
-                    size: 35,
-                  ),
-                  Text(
-                    "User name",
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface
-                    ),
-                  ),
 
-                ],
-              ),
-            ),
+          Headeraccount(
+              user_name: "User name"
           ),
 
           Container(

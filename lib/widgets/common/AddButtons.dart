@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:r411alto/widgets/common/NavItem.dart';
 
@@ -56,10 +57,14 @@ class AddButtons extends StatelessWidget {
                       child: Text("Scanner un QR Code")
                   )
                 ],
-              ),
+              )
+              .animate()
+              .fade(curve: Curves.easeOut)
+              .,
             ]
           ),
-        ),
+        )
+
       )
     );
   }
