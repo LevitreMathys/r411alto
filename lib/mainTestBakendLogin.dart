@@ -22,20 +22,22 @@ class _MonEcranTestState extends State<MonEcranTest> {
   final ImageService _imageService = ImageService();
 
   // Contrôleurs pour les champs de texte
-  final TextEditingController _lastnameController = TextEditingController();
   final TextEditingController _firstnameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _lastnameController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   String infoAffichee = "Rien pour l'instant";
   File? _selectedImage;
 
   @override
   void dispose() {
-    _lastnameController.dispose();
     _firstnameController.dispose();
-    _emailController.dispose();
+    _lastnameController.dispose();
     _dobController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -108,6 +110,14 @@ class _MonEcranTestState extends State<MonEcranTest> {
 
               // CHAMPS DE TEXTE POUR LA SAISIE MANUELLE
               TextField(
+                controller: _firstnameController,
+                decoration: InputDecoration(
+                  labelText: 'Prénom',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 10),
+              TextField(
                 controller: _lastnameController,
                 decoration: InputDecoration(
                   labelText: 'Nom',
@@ -116,11 +126,12 @@ class _MonEcranTestState extends State<MonEcranTest> {
               ),
               SizedBox(height: 10),
               TextField(
-                controller: _firstnameController,
+                controller: _dobController,
                 decoration: InputDecoration(
-                  labelText: 'Prénom',
+                  labelText: 'Date de naissance (jj-mm-aaaa)',
                   border: OutlineInputBorder(),
                 ),
+                keyboardType: TextInputType.datetime,
               ),
               SizedBox(height: 10),
               TextField(
@@ -133,12 +144,11 @@ class _MonEcranTestState extends State<MonEcranTest> {
               ),
               SizedBox(height: 10),
               TextField(
-                controller: _dobController,
+                controller: _passwordController,
                 decoration: InputDecoration(
-                  labelText: 'Date de naissance (jj-mm-aaaa)',
+                  labelText: 'Mot de passe',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType: TextInputType.datetime,
               ),
 
               SizedBox(height: 20),
@@ -156,30 +166,21 @@ class _MonEcranTestState extends State<MonEcranTest> {
               ElevatedButton(
                 onPressed: () async {
                   try {
-                    // 1) Récupérer les anciennes infos pour trouver l'ancienne image
-                    Map<String, String> oldInfos = await _storageService
-                        .getLoginInfos();
-                    String oldPath = oldInfos['picture'] ?? '';
-
-                    // 2) Supprimer l'ancienne image si elle existe et si elle est différente de la nouvelle
-                    if (oldPath.isNotEmpty &&
-                        (oldPath != (_selectedImage?.path ?? ''))) {
-                      await _imageService.deleteImage(File(oldPath));
-                    }
-
-                    // 3) Sauvegarder les nouvelles infos
+                    // Obtenir le chemin de l'image sauvegardée
                     if (_selectedImage != null) {
                       await _imageService.savePickImage(_selectedImage!.path);
                     }
 
                     // On fait l'appel qui gère aussi la vérification et l'erreur de date (le try-catch interceptera l'exception)
                     await _storageService.setLoginInfos(
-                      lastname: _lastnameController.text,
                       firstname: _firstnameController.text,
+                      lastname: _lastnameController.text,
                       dateOfBirth: _dobController.text,
                       email: _emailController.text,
-                      picturePath: _selectedImage?.path ?? "",
-                      password: "SuperSecret123!", // Mot de passe fictif
+                      picturePath:
+                          _selectedImage?.path ??
+                          "", // peu être vide mais doit être fourni tout de même
+                      password: _passwordController.text,
                     );
 
                     setState(() {
@@ -203,18 +204,20 @@ class _MonEcranTestState extends State<MonEcranTest> {
                       .getLoginInfos();
 
                   setState(() {
-                    _lastnameController.text = donnees['lastname'] ?? '';
                     _firstnameController.text = donnees['firstname'] ?? '';
-                    _emailController.text = donnees['email'] ?? '';
+                    _lastnameController.text = donnees['lastname'] ?? '';
                     _dobController.text = donnees['dateOfBirth'] ?? '';
+                    _emailController.text = donnees['email'] ?? '';
+                    _passwordController.text =
+                        donnees['password'] ?? donnees['mdp'] ?? '';
 
                     infoAffichee =
-                        "Données chargées !\nMDP: ${donnees['mdp']}\nPath Image: ${donnees['picture']}";
+                        "Données chargées !\nPath Image: ${donnees['picturePath']}";
 
                     // Gérer l'affichage de l'image
-                    if (donnees['picture'] != null &&
-                        donnees['picture']!.isNotEmpty) {
-                      File imgFile = File(donnees['picture']!);
+                    String picturePath = donnees['picturePath'] ?? '';
+                    if (picturePath.isNotEmpty) {
+                      File imgFile = File(picturePath);
                       if (imgFile.existsSync()) {
                         _selectedImage = imgFile;
                       } else {
@@ -231,6 +234,28 @@ class _MonEcranTestState extends State<MonEcranTest> {
               ),
               SizedBox(height: 10),
 
+              // BOUTON VIDER L'INTERFACE
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                onPressed: () {
+                  setState(() {
+                    _selectedImage = null;
+                    _firstnameController.clear();
+                    _lastnameController.clear();
+                    _dobController.clear();
+                    _emailController.clear();
+                    _passwordController.clear();
+                    infoAffichee =
+                        "L'interface a été vidée (les données en base sont toujours là).";
+                  });
+                },
+                child: Text(
+                  "Vider l'interface",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              SizedBox(height: 10),
+
               // BOUTON TOUT SUPPRIMER
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -238,10 +263,11 @@ class _MonEcranTestState extends State<MonEcranTest> {
                   await _storageService.clearAll();
                   setState(() {
                     _selectedImage = null;
-                    _lastnameController.clear();
                     _firstnameController.clear();
-                    _emailController.clear();
+                    _lastnameController.clear();
                     _dobController.clear();
+                    _emailController.clear();
+                    _passwordController.clear();
                     infoAffichee = "Tout a été effacé.";
                   });
                 },
