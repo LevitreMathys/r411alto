@@ -1,12 +1,20 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class StorageService {
-  // StorageService : gestion du stockage des donnée de l'application.
+  /// StorageService : gestion du stockage des données de l'application.
 
-  // Création de l'instance du stockage
+  /// Création de l'instance du stockage.
   final _storage = const FlutterSecureStorage();
 
-  // Méthode de vérification des infos
+  /// Méthode de vérification des infos.
+  ///
+  /// Paramètres :
+  /// - firstname (String) : Le prénom de l'utilisateur.
+  /// - lastname (String) : Le nom de l'utilisateur.
+  /// - dateOfBirth (String) : La date de naissance au format jj-mm-aaaa.
+  /// - email (String) : L'adresse email de l'utilisateur.
+  /// - picturePath (String) : Le chemin de l'image (peut être vide mais doit être fourni).
+  /// - password (String) : Le mot de passe (doit contenir au moins 8 caractères).
   void verifyLoginInfos({
     required String firstname,
     required String lastname,
@@ -86,7 +94,15 @@ class StorageService {
     }
   }
 
-  // Enregistrer les info du login (nom prenom photo mdp)
+  /// Enregistrer les infos du login (nom, prénom, date de naissance, email, photo, mdp).
+  ///
+  /// Paramètres :
+  /// - firstname (String) : Le prénom de l'utilisateur.
+  /// - lastname (String) : Le nom de l'utilisateur.
+  /// - dateOfBirth (String) : La date de naissance au format jj-mm-aaaa. (string)
+  /// - email (String) : L'adresse email de l'utilisateur.
+  /// - picturePath (String) : Le chemin de l'image (ex: /data/user/0/...).
+  /// - password (String) : Le mot de passe (pas besoin de chiffrer, flutter_secure_storage s'en charge).
   Future<void> setLoginInfos({
     required String firstname,
     required String lastname,
@@ -123,7 +139,9 @@ class StorageService {
     }
   }
 
-  // Récupérer les infos du login
+  /// Récupérer les infos du login.
+  ///
+  /// Return : Future<Map<String, String>> : les infos du login.
   Future<Map<String, String>> getLoginInfos() async {
     String lastname = await _storage.read(key: 'lastname') ?? '';
     String firstname = await _storage.read(key: 'firstname') ?? '';
@@ -142,7 +160,7 @@ class StorageService {
     };
   }
 
-  // Tout supprimer
+  /// Supprime tout.
   Future<void> clearAll() async {
     await _storage.deleteAll();
   }

@@ -79,26 +79,30 @@ class _MonEcranTestState extends State<MonEcranTest> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton.icon(
+                    // Bouton pour prendre une photo
                     onPressed: () async {
-                      final String imagePath = await _imageService.getImagePath(
-                        ImageSource.camera,
-                      );
-                      setState(() {
-                        _selectedImage = File(imagePath);
-                      });
+                      final String imagePath = await _imageService
+                          .getImagePathFromCache(ImageSource.camera);
+                      if (imagePath.isNotEmpty) {
+                        setState(() {
+                          _selectedImage = File(imagePath);
+                        });
+                      }
                     },
                     icon: Icon(Icons.camera_alt),
                     label: Text("Caméra"),
                   ),
                   SizedBox(width: 10),
                   ElevatedButton.icon(
+                    // Bouton pour choisir une photo dans la galerie
                     onPressed: () async {
-                      final String imagePath = await _imageService.getImagePath(
-                        ImageSource.gallery,
-                      );
-                      setState(() {
-                        _selectedImage = File(imagePath);
-                      });
+                      final String imagePath = await _imageService
+                          .getImagePathFromCache(ImageSource.gallery);
+                      if (imagePath.isNotEmpty) {
+                        setState(() {
+                          _selectedImage = File(imagePath);
+                        });
+                      }
                     },
                     icon: Icon(Icons.photo_library),
                     label: Text("Galerie"),
@@ -166,20 +170,44 @@ class _MonEcranTestState extends State<MonEcranTest> {
               ElevatedButton(
                 onPressed: () async {
                   try {
-                    // Obtenir le chemin de l'image sauvegardée
+                    // 1) Vérification avant de modifier les fichiers
+                    _storageService.verifyLoginInfos(
+                      firstname: _firstnameController.text,
+                      lastname: _lastnameController.text,
+                      dateOfBirth: _dobController.text,
+                      email: _emailController.text,
+                      picturePath: _selectedImage?.path ?? "",
+                      password: _passwordController.text,
+                    );
+
+                    // 2) Gestion image (sauvegarde + supprimer l'ancien)
+                    Map<String, String> anciennesDonnees = await _storageService
+                        .getLoginInfos();
+                    String oldPicturePath =
+                        anciennesDonnees['picturePath'] ?? '';
+
+                    String newPicturePath = '';
                     if (_selectedImage != null) {
-                      await _imageService.savePickImage(_selectedImage!.path);
+                      newPicturePath = await _imageService.saveImageToStorage(
+                        _selectedImage!.path,
+                        oldStorageImagePath: oldPicturePath,
+                      );
+                      _selectedImage = File(
+                        newPicturePath,
+                      ); // Update reference to point to permanent file
+                    } else if (oldPicturePath.isNotEmpty) {
+                      await _imageService.deleteImageFromStorage(
+                        oldPicturePath,
+                      );
                     }
 
-                    // On fait l'appel qui gère aussi la vérification et l'erreur de date (le try-catch interceptera l'exception)
+                    // 3) Maj bdd
                     await _storageService.setLoginInfos(
                       firstname: _firstnameController.text,
                       lastname: _lastnameController.text,
                       dateOfBirth: _dobController.text,
                       email: _emailController.text,
-                      picturePath:
-                          _selectedImage?.path ??
-                          "", // peu être vide mais doit être fourni tout de même
+                      picturePath: newPicturePath,
                       password: _passwordController.text,
                     );
 
@@ -260,6 +288,13 @@ class _MonEcranTestState extends State<MonEcranTest> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 onPressed: () async {
+                  Map<String, String> donnees = await _storageService
+                      .getLoginInfos();
+                  String oldPicturePath = donnees['picturePath'] ?? '';
+                  if (oldPicturePath.isNotEmpty) {
+                    await _imageService.deleteImageFromStorage(oldPicturePath);
+                  }
+
                   await _storageService.clearAll();
                   setState(() {
                     _selectedImage = null;
