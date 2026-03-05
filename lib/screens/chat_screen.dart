@@ -19,9 +19,10 @@ class _ChatScreen extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
 
 
-
   void _sendMessage() {
-    if (_controller.text.trim().isEmpty) return;
+    if (_controller.text
+        .trim()
+        .isEmpty) return;
 
     setState(() {
       messages.add({"text": _controller.text.trim(), "isMe": true});
@@ -39,76 +40,79 @@ class _ChatScreen extends State<ChatScreen> {
         );
       }
     });
-  static const String _rickRollUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+    const String _rickRollUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 
-  Future<void> _launchRickRoll() async {
-    final Uri url = Uri.parse(_rickRollUrl);
-    if (!await launchUrl(url)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not open the Rick Roll!'),
-          ),
-        );
+    Future<void> _launchRickRoll() async {
+      final Uri url = Uri.parse(_rickRollUrl);
+      if (!await launchUrl(url)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open the Rick Roll!'),
+            ),
+          );
+        }
       }
     }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea( // pour éviter les encoches
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // aligne à gauche
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // retour à la page précédente
-                  },
-                  icon: const Icon(Icons.arrow_back),
-                ),
-                Headeraccount(
-                    user_name: "Other user name"
-                )
-              ],
-            ),
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final msg = messages[index];
-                  return Message(
-                    text: msg['text'],
-                    isMe: msg['isMe'],
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: TextField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  hintText: 'Enter your message',
-                  filled: true,
-                  fillColor: Colors.grey,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30)
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        body: SafeArea( // pour éviter les encoches
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // aligne à gauche
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator
+                          .of(context)
+                          .pop(); // retour à la page précédente
+                    },
+                    icon: const Icon(Icons.arrow_back),
                   ),
-                  suffixIcon: IconButton(
-                      onPressed: _sendMessage,
-                      icon: Icon(Icons.send)
+                  Headeraccount(
+                      user_name: "Other user name"
                   )
+                ],
+              ),
+              Expanded(
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final msg = messages[index];
+                    return Message(
+                      text: msg['text'],
+                      isMe: msg['isMe'],
+                    );
+                  },
                 ),
               ),
-            )
-          ],
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                      hintText: 'Enter your message',
+                      filled: true,
+                      fillColor: Colors.grey,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30)
+                      ),
+                      suffixIcon: IconButton(
+                          onPressed: _sendMessage,
+                          icon: Icon(Icons.send)
+                      )
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 }
