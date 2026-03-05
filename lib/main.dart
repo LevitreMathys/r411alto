@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:r411alto/App.dart';
 import 'package:r411alto/screens/chat_screen.dart';
 import 'package:r411alto/screens/settings_screen.dart';
+import 'package:r411alto/services/onboarding_storage.dart';
 import 'package:r411alto/theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/first_screen.dart';
@@ -27,6 +28,26 @@ void main() {
 }
 
 final GoRouter _router = GoRouter(
+
+  initialLocation: '/',
+
+  redirect: (context, state) async {
+
+    final seen = await OnboardingStorage.isCompleted();
+
+    // si l'utilisateur n'a PAS vu l'onboarding
+    if (!seen && state.uri.path != '/first-screen') {
+      return '/first-screen';
+    }
+
+    // s'il l'a déjà vu et tente d'y retourner
+    if (seen && state.uri.path == '/first-screen') {
+      return '/';
+    }
+
+    return null;
+  },
+
   routes: [
     ShellRoute(
       builder: (context, state, child) {

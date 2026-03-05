@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../services/onboarding_storage.dart';
+
 class OnBoardingFlowButton extends StatelessWidget {
 
   final String route;
@@ -21,7 +23,13 @@ class OnBoardingFlowButton extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return TextButton(
-        onPressed: () {
+        onPressed: () async {
+
+          // Si on est sur l'écran d'onboarding
+          if (GoRouterState.of(context).uri.path == "/first-screen") {
+            await OnboardingStorage.complete();
+          }
+
           context.go(this.route);
         },
         child: Text(
