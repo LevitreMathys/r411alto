@@ -58,7 +58,8 @@ class AddButtons extends StatelessWidget {
                   )
                 ],
               )
-
+              .animate()
+              .fade(curve: Curves.easeOut)
             ]
           ),
         )
