@@ -6,7 +6,10 @@ import 'package:r411alto/widgets/common/AddButtons.dart';
 import 'package:r411alto/widgets/common/FloatingBar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:r411alto/widgets/common/HeaderHomeScreen.dart';
+<<<<<<< feature/themes
+=======
 import 'package:r411alto/widgets/common/PopUpAlert.dart';
+>>>>>>> dev
 
 
 class App extends ConsumerWidget {
@@ -36,6 +39,8 @@ class App extends ConsumerWidget {
               child: Headerhomescreen(),
             ),
 
+<<<<<<< feature/themes
+=======
 /*
           Positioned(
             top: 10,
@@ -49,6 +54,7 @@ class App extends ConsumerWidget {
             )
           ),
 */
+>>>>>>> dev
 
 
           Positioned.fill(
