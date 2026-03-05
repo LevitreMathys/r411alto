@@ -40,23 +40,24 @@ class _ChatScreen extends State<ChatScreen> {
         );
       }
     });
-    const String _rickRollUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+  }
 
-    Future<void> _launchRickRoll() async {
-      final Uri url = Uri.parse(_rickRollUrl);
-      if (!await launchUrl(url)) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open the Rick Roll!'),
-            ),
-          );
-        }
+  Future<void> _launchRickRoll() async {
+    const String _rickRollUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+    final Uri url = Uri.parse(_rickRollUrl);
+    if (!await launchUrl(url)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not open the Rick Roll!'),
+          ),
+        );
       }
     }
+  }
 
-    @override
-    Widget build(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
       return Scaffold(
         body: SafeArea( // pour éviter les encoches
           child: Column(
@@ -115,4 +116,3 @@ class _ChatScreen extends State<ChatScreen> {
       );
     }
   }
-}
