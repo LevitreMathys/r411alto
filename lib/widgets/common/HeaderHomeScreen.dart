@@ -1,0 +1,66 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
+import 'package:r411alto/widgets/common/HeaderAccount.dart';
+import 'package:r411alto/widgets/common/NavItem.dart';
+
+class Headerhomescreen extends StatelessWidget {
+
+  static const double height = 90;
+
+  const Headerhomescreen(
+      {
+        super.key
+      }
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+
+          Headeraccount(
+              user_name: "User name"
+          ),
+
+          Container(
+            child: IconButton(
+              icon: Icon(Icons.settings),
+              iconSize: 35,
+              onPressed: () {
+                context.go("/settings");
+              },
+            ),
+          )
+        ],
+      ),
+
+    )
+    .animate()
+    .slideY(
+      begin: -1,
+      end: 0,
+      duration: 400.ms,
+      curve: Curves.easeOut
+    );
+  }
+
+}
