@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:r411alto/widgets/common/HeaderAccount.dart';
 import 'package:r411alto/widgets/common/message.dart';
+import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -37,6 +39,19 @@ class _ChatScreen extends State<ChatScreen> {
         );
       }
     });
+  static const String _rickRollUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+
+  Future<void> _launchRickRoll() async {
+    final Uri url = Uri.parse(_rickRollUrl);
+    if (!await launchUrl(url)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not open the Rick Roll!'),
+          ),
+        );
+      }
+    }
   }
 
   @override
