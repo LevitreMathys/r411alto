@@ -38,6 +38,7 @@ class NavItem extends StatelessWidget {
         context.go("/first-screen");
         context.push("/chat");
         break;
+        context.go("/first-screen");
       case "home":
         context.go("/");
         break;

@@ -34,7 +34,6 @@ class App extends ConsumerWidget {
               right: 0,
               child: Headerhomescreen(),
             ),
-
           Positioned.fill(
             child: Align(
               alignment: Alignment.bottomLeft,
