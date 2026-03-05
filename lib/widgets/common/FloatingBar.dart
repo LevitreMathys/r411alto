@@ -14,8 +14,11 @@ class FloatingBar extends ConsumerStatefulWidget {
 class _FloatingBarState extends ConsumerState<FloatingBar> {
   @override
   Widget build(BuildContext context) {
+
+    final double iconSize = 30;
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(7),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(30),
@@ -30,7 +33,7 @@ class _FloatingBarState extends ConsumerState<FloatingBar> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          NavItem(icon: Icons.message_outlined, name: "message", size: 35,),
+          NavItem(icon: Icons.message_outlined, name: "message", size: iconSize,),
 
           // Bouton Add
           IconButton(
@@ -40,14 +43,15 @@ class _FloatingBarState extends ConsumerState<FloatingBar> {
               final current = ref.read(activatedButtonsNotifier).isActivated;
               notifier.setIsActivatedValue(!current);
             },
-            iconSize: 35,
+            iconSize: iconSize,
           ),
 
-          NavItem(icon: Icons.house, name: "home", size: 35,),
-          NavItem(icon: Icons.account_circle, name: "profil", size: 35,),
+          NavItem(icon: Icons.house, name: "home", size: iconSize,),
+          NavItem(icon: Icons.account_circle, name: "profil", size: iconSize,),
         ],
       ),
     );
+
   }
 }
 
