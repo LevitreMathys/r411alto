@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:r411alto/App.dart';
+import 'package:r411alto/screens/chat_screen.dart';
+import 'package:r411alto/screens/settings_screen.dart';
+import 'package:r411alto/theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/first_screen.dart';
 import 'screens/account_created_screen.dart';
@@ -37,12 +40,21 @@ final GoRouter _router = GoRouter(
         ),
 
 
+        GoRoute(
+          path: "/settings",
+          builder: (context, state) => const SettingsScreen(title: 'Settings'),
+        ),
 
         GoRoute(
           path: '/profil-setting',
           builder: (context, state) => const ProfilSettingScreen(),
         ),
       ],
+    ),
+
+    GoRoute(
+      path: "/chat",
+      builder: (context, state) => const ChatScreen()
     ),
 
     // écrans hors menu
@@ -92,9 +104,9 @@ class MyApp extends StatelessWidget {
       routerConfig: _router,
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
     );
   }
 }

@@ -29,7 +29,7 @@ class OnBoardingFlowButton extends StatelessWidget {
           style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: screenWidth * 0.06,
-              color: Colors.black
+              color: Theme.of(context).colorScheme.onSurface
           ),
         )
     );

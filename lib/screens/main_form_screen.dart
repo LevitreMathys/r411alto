@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:r411alto/widgets/common/onBoardingFlow/Input.dart';
 import 'package:r411alto/widgets/common/onBoardingFlow/OnBoardingFlowButton.dart';
 import 'package:r411alto/widgets/common/onBoardingFlow/RegistrationForm.dart';
 
@@ -31,7 +30,7 @@ class MainFormScreen extends StatelessWidget {
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 380),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

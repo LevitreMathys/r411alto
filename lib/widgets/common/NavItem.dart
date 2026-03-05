@@ -23,7 +23,10 @@ class NavItem extends StatelessWidget {
       onPressed: () => {
         ChangeScreen(context)
       },
-      icon: Icon(this.icon),
+      icon: Icon(
+        this.icon,
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
       iconSize: this.size,
     );
   }
@@ -31,10 +34,15 @@ class NavItem extends StatelessWidget {
   void ChangeScreen(BuildContext context) {
     switch (this.name) {
 
+      case"message":
+        context.push("/chat");
+        break;
       case "home":
         context.go("/");
+        break;
       case "profil":
         context.go("/profil-setting");
+        break;
     }
   }
 

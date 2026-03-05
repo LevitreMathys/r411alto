@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:r411alto/providers/activated_buttons_provider.dart';
 import 'package:r411alto/widgets/common/AddButtons.dart';
 import 'package:r411alto/widgets/common/FloatingBar.dart';
 import 'package:go_router/go_router.dart';
+import 'package:r411alto/widgets/common/HeaderHomeScreen.dart';
+import 'package:r411alto/widgets/common/PopUpAlert.dart';
 
 
 class App extends ConsumerWidget {
@@ -14,45 +17,45 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final showAddButtons = ref.watch(activatedButtonsNotifier).isActivated;
 
+    final location = GoRouter.of(context).routerDelegate.currentConfiguration.uri.toString();
+    final isHome = location == "/";
+
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       extendBody: true,
       body: Stack(
         children: [
 
           body,
 
+          if(isHome)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Headerhomescreen(),
+            ),
+
+/*
+          Positioned(
+            top: 10,
+            left: 10,
+            right: 10,
+            child: SafeArea(
+              child: PopUpAlert(
+                  isErr: false,
+                  content: "Erreur"
+              )
+            )
+          ),
+*/
+
+
           Positioned.fill(
             child: Align(
               alignment: Alignment.bottomLeft,
               child: IgnorePointer(
-                child:
-                /*
-                WaveWidget(
-                  config: CustomConfig(
-                    colors: [
-                      Color(0xFF70136E),
-                      Color(0xFFC03DBE),
-                      Color(0xFFFA31F7),
-
-                    ],
-                    durations: [
-                      10000,
-                      10000,
-                      10000,
-                    ],
-                    heightPercentages: [
-                      1,
-                      1,
-                      1,
-                    ],
-
-
-                  ),
-                  backgroundColor: const Color(0xFFFFFFFF),
-                  size: const Size(double.infinity, double.infinity),
-                  waveAmplitude: 500,
-                ),*/
-                Image.asset(
+                child: Image.asset(
                   "assets/images/Group14.png",
                   width: MediaQuery.of(context).size.width,
                   fit: BoxFit.cover, // ou BoxFit.contain selon le rendu voulu
@@ -88,6 +91,13 @@ class App extends ConsumerWidget {
             child: SafeArea(
               child: FloatingBar(),
             ),
+          )
+          .animate()
+          .slideY(
+            begin: 1,
+            end: 0,
+            duration: 400.ms,
+            curve: Curves.easeIn
           ),
         ],
       ),

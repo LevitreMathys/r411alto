@@ -44,6 +44,7 @@ dependencies:
   wave: ^0.2.2
   calendar_date_picker2: ^2.0.1
   url_launcher: ^6.3.2
+  flutter_animate: ^4.5.2
 
 dev_dependencies:
   flutter_test:

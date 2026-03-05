@@ -1,9 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:r411alto/widgets/common/HeaderAccount.dart';
 import 'package:r411alto/widgets/common/NavItem.dart';
 
 class Headerhomescreen extends StatelessWidget {
+
+  static const double height = 90;
+
   const Headerhomescreen(
       {
         super.key
@@ -15,11 +20,14 @@ class Headerhomescreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -28,23 +36,9 @@ class Headerhomescreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            child: TextButton(
-              onPressed: () {
-                context.go("/profil-setting");
-              },
-              child: Row(
-                children: [
-                  NavItem(
-                    icon: Icons.account_circle,
-                    name: "profil",
-                    size: 35,
-                  ),
-                  Text("User name"),
 
-                ],
-              ),
-            ),
+          Headeraccount(
+              user_name: "User name"
           ),
 
           Container(
@@ -52,13 +46,20 @@ class Headerhomescreen extends StatelessWidget {
               icon: Icon(Icons.settings),
               iconSize: 35,
               onPressed: () {
-                context.go("/first-screen");
+                context.go("/settings");
               },
             ),
           )
         ],
       ),
 
+    )
+    .animate()
+    .slideY(
+      begin: -1,
+      end: 0,
+      duration: 400.ms,
+      curve: Curves.easeOut
     );
   }
 
