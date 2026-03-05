@@ -35,12 +35,10 @@ class NavItem extends StatelessWidget {
     switch (this.name) {
 
       case"message":
-<<<<<<< feature/themes
         context.go("/first-screen");
-=======
         context.push("/chat");
         break;
->>>>>>> dev
+        context.go("/first-screen");
       case "home":
         context.go("/");
         break;
