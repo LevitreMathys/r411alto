@@ -7,7 +7,6 @@ import 'package:r411alto/screens/settings_screen.dart';
 import 'package:r411alto/screens/chat_screen.dart';
 import 'package:r411alto/screens/settings_screen.dart';
 import 'package:r411alto/services/onboarding_storage.dart';
-import 'package:r411alto/screens/settings_screen.dart';
 import 'package:r411alto/theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/first_screen.dart';
