@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:r411alto/App.dart';
 import 'package:r411alto/screens/settings_screen.dart';
 import 'package:r411alto/screens/chat_screen.dart';
-import 'package:r411alto/screens/settings_screen.dart';
 import 'package:r411alto/services/onboarding_storage.dart';
 import 'package:r411alto/theme/app_theme.dart';
 import 'screens/home_screen.dart';
@@ -18,22 +17,17 @@ import 'screens/scan_qr_code_screen.dart';
 import 'screens/easter_egg.dart';
 
 void main() {
-
   WidgetsFlutterBinding.ensureInitialized();
 
-  SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.immersiveSticky,
-  );
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   runApp(ProviderScope(child: MyApp()));
 }
 
 final GoRouter _router = GoRouter(
-
   initialLocation: '/',
 
   redirect: (context, state) async {
-
     final seen = await OnboardingStorage.isCompleted();
 
     // si l'utilisateur n'a PAS vu l'onboarding
@@ -55,12 +49,10 @@ final GoRouter _router = GoRouter(
         return App(body: child);
       },
       routes: [
-
         GoRoute(
           path: '/',
           builder: (context, state) => const HomeScreen(title: 'Home'),
         ),
-
 
         GoRoute(
           path: "/settings",
@@ -74,10 +66,7 @@ final GoRouter _router = GoRouter(
       ],
     ),
 
-    GoRoute(
-      path: "/chat",
-      builder: (context, state) => const ChatScreen()
-    ),
+    GoRoute(path: "/chat", builder: (context, state) => const ChatScreen()),
 
     // écrans hors menu
     GoRoute(
@@ -114,8 +103,6 @@ final GoRouter _router = GoRouter(
     ),
   ],
 );
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
