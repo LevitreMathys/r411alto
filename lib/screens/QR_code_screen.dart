@@ -7,6 +7,7 @@ import 'dart:async';
 import '../crypto/key_generator.dart';
 import '../crypto/key_storage.dart';
 import '../services/pairing_service.dart';
+import 'relation_screen.dart';
 
 class QRCodeScreen extends StatefulWidget {
   const QRCodeScreen({super.key});
@@ -103,8 +104,11 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
         );
   }
 
+  String? myRelationCode; // Add at class level with codeA
+
   Future<void> _finalize(String codeA) async {
     try {
+      myRelationCode = codeA; // Set before finalize
       final bobInfo = await PairingService().finalizePairing(codeA);
       const storage = FlutterSecureStorage();
       await storage.write(key: 'peer_pub_$codeA', value: bobInfo.publicKeyA);
@@ -113,9 +117,13 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Pairing réussi !')));
-        Future.delayed(const Duration(seconds: 2), () {
-          Navigator.pop(context);
-        });
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                RelationScreen(initialRelationCode: myRelationCode!),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {

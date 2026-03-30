@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import '../models/element.dart';
 import 'api_client.dart';
@@ -12,22 +13,38 @@ class ElementService {
     required String key,
     required String encryptedValue,
   }) async {
-    final data = {
-      'relationCode': relationCode,
-      'key': key,
-      'value': encryptedValue,
-    };
-    final response = await _client.post('/element', data);
-    return response.data['id']?.toString() ?? '';
+    try {
+      final data = {
+        'relationCode': relationCode,
+        'key': key,
+        'value': encryptedValue,
+      };
+      final response = await _client.post('/element', data);
+      return response.data['id']?.toString() ?? '';
+    } catch (e) {
+      developer.log(
+        'DEBUG: Element post failed: \${e.displayMessage}',
+        name: 'ElementService',
+      );
+      rethrow;
+    }
   }
 
   /// Get elements for relation.
   Future<List<Element>> getElements(String relationCode) async {
-    final response = await _client.get(
-      '/element',
-      queryParameters: {'relationCode': relationCode},
-    );
-    final List<dynamic> list = response.data;
-    return list.map((json) => Element.fromJson(json)).toList();
+    try {
+      final response = await _client.get(
+        '/element',
+        queryParameters: {'relationCode': relationCode},
+      );
+      final List<dynamic> list = response.data;
+      return list.map((json) => Element.fromJson(json)).toList();
+    } catch (e) {
+      developer.log(
+        'DEBUG: Element get failed: \${e.displayMessage}',
+        name: 'ElementService',
+      );
+      rethrow;
+    }
   }
 }

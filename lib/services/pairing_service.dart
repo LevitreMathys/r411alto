@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
 import 'api_client.dart';
@@ -38,9 +39,17 @@ class PairingService {
     String? relationCodeA,
     required String publicKeyA,
   }) async {
-    relationCodeA ??= const Uuid().v4();
-    final data = {'relationCode': relationCodeA, 'userPublicKey': publicKeyA};
-    await _client.post('/pairing', data);
+    try {
+      relationCodeA ??= const Uuid().v4();
+      final data = {'relationCode': relationCodeA, 'userPublicKey': publicKeyA};
+      await _client.post('/pairing', data);
+    } catch (e) {
+      developer.log(
+        'DEBUG: Pairing init failed: \${(e as ApiException).displayMessage}',
+        name: 'PairingService',
+      );
+      rethrow;
+    }
   }
 
   /// Step 2: Bob matches with Alice's code.
@@ -50,30 +59,54 @@ class PairingService {
     required String publicKeyB,
     String? relationCodeB,
   }) async {
-    relationCodeB ??= const Uuid().v4();
-    final data = {
-      'relationCodeA': relationCodeA,
-      'relationCodeB': relationCodeB,
-      'publicKeyB': publicKeyB,
-    };
-    final response = await _client.put('/pairing', data);
-    return PairingInfo.fromJson(response.data);
+    try {
+      relationCodeB ??= const Uuid().v4();
+      final data = {
+        'relationCodeA': relationCodeA,
+        'relationCodeB': relationCodeB,
+        'publicKeyB': publicKeyB,
+      };
+      final response = await _client.put('/pairing', data);
+      return PairingInfo.fromJson(response.data);
+    } catch (e) {
+      developer.log(
+        'DEBUG: Pairing match failed: \${(e as ApiException).displayMessage}',
+        name: 'PairingService',
+      );
+      rethrow;
+    }
   }
 
   /// Step 3: Alice finalizes after polling detects match.
   /// Returns Bob's info.
   Future<PairingInfo> finalizePairing(String relationCodeA) async {
-    final response = await _client.delete(
-      '/pairing',
-      queryParameters: {'relationCodeA': relationCodeA},
-    );
-    return PairingInfo.fromJson(response.data);
+    try {
+      final response = await _client.delete(
+        '/pairing',
+        queryParameters: {'relationCodeA': relationCodeA},
+      );
+      return PairingInfo.fromJson(response.data);
+    } catch (e) {
+      developer.log(
+        'DEBUG: Pairing finalize failed: \${(e as ApiException).displayMessage}',
+        name: 'PairingService',
+      );
+      rethrow;
+    }
   }
 
   /// Poll status for a code.
   Future<StatusResponse> getStatus(String code) async {
-    final response = await _client.get('/pairing/$code/status');
-    return StatusResponse.fromJson(response.data);
+    try {
+      final response = await _client.get('/pairing/$code/status');
+      return StatusResponse.fromJson(response.data);
+    } catch (e) {
+      developer.log(
+        'DEBUG: Pairing status failed: \${(e as ApiException).displayMessage}',
+        name: 'PairingService',
+      );
+      rethrow;
+    }
   }
 
   /// Stream for polling until finalized (timeout 2min).
@@ -85,6 +118,10 @@ class PairingService {
       if (status.status == 'finalized') return;
       await Future.delayed(const Duration(seconds: 2));
     }
-    throw ApiException('Polling timeout for code: $code');
+    throw ApiException(
+      'Polling timeout pour le code $code',
+      null,
+      'Temps d attente depasse pour le pairing',
+    );
   }
 }

@@ -7,6 +7,7 @@ import 'dart:async';
 import '../crypto/key_generator.dart';
 import '../crypto/key_storage.dart';
 import '../services/pairing_service.dart';
+import 'relation_screen.dart';
 
 class ScanQRCodeScreen extends StatefulWidget {
   const ScanQRCodeScreen({super.key});
@@ -53,7 +54,7 @@ class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
         relationCodeB: codeB,
       );
       await KeyStorage.storeKeys(
-        relationCodeA,
+        codeB,
         keyPairMap['publicKeyPem']!,
         keyPairMap['privateKeyPem']!,
       );
@@ -62,6 +63,7 @@ class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
         key: 'peer_pub_$relationCodeA',
         value: aliceInfo.publicKeyA,
       );
+      myRelationCode = codeB; // Set my code for later nav
       setState(() {
         keyPair = keyPairMap;
         status = 'waiting';
@@ -106,13 +108,21 @@ class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
         );
   }
 
+  String? myRelationCode; // Add this field
+
   void _completePairing() {
     _pollSub?.cancel();
     if (mounted) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Pairing finalisé !')));
-      Navigator.pop(context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              RelationScreen(initialRelationCode: myRelationCode!),
+        ),
+      );
     }
   }
 

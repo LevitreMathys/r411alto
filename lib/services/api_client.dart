@@ -4,8 +4,11 @@ import 'package:dio/dio.dart';
 class ApiException implements Exception {
   final String message;
   final DioException? dioException;
+  final String? userMessage;
 
-  ApiException(this.message, [this.dioException]);
+  ApiException(this.message, [this.dioException, this.userMessage]);
+
+  String get displayMessage => userMessage ?? message;
 
   @override
   String toString() => 'ApiException: $message';
@@ -46,6 +49,39 @@ class ApiClient {
     );
   }
 
+  static String _getUserMessage(DioException e) {
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return 'Timeout de connexion';
+      case DioExceptionType.badResponse:
+        final code = e.response?.statusCode;
+        switch (code) {
+          case 400:
+            return 'Mauvaise requête';
+          case 401:
+            return 'Non autorisé';
+          case 403:
+            return 'Interdit';
+          case 404:
+            return 'Non trouvé';
+          case 500:
+            return 'Erreur serveur';
+          default:
+            return 'Erreur serveur ($code)';
+        }
+      case DioExceptionType.cancel:
+        return 'Opération annulée';
+      case DioExceptionType.badCertificate:
+        return 'Certificat invalide';
+      case DioExceptionType.connectionError:
+        return 'Erreur de connexion';
+      default:
+        return 'Erreur réseau inconnue';
+    }
+  }
+
   /// Singleton instance
   static ApiClient get instance => _instance ??= ApiClient._();
 
@@ -56,7 +92,7 @@ class ApiClient {
     try {
       return await _dio.get(path, queryParameters: queryParameters);
     } on DioException catch (e) {
-      throw ApiException('GET $path failed', e);
+      throw ApiException('GET $path failed', e, _getUserMessage(e));
     }
   }
 
@@ -64,7 +100,7 @@ class ApiClient {
     try {
       return await _dio.post(path, data: data);
     } on DioException catch (e) {
-      throw ApiException('POST $path failed', e);
+      throw ApiException('POST $path failed', e, _getUserMessage(e));
     }
   }
 
@@ -72,7 +108,7 @@ class ApiClient {
     try {
       return await _dio.put(path, data: data);
     } on DioException catch (e) {
-      throw ApiException('PUT $path failed', e);
+      throw ApiException('PUT $path failed', e, _getUserMessage(e));
     }
   }
 
@@ -83,7 +119,7 @@ class ApiClient {
     try {
       return await _dio.delete(path, queryParameters: queryParameters);
     } on DioException catch (e) {
-      throw ApiException('DELETE $path failed', e);
+      throw ApiException('DELETE $path failed', e, _getUserMessage(e));
     }
   }
 }
