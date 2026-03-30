@@ -18,8 +18,6 @@ class _ChatScreen extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-
-
   void _sendMessage() {
     if (_controller.text.trim().isEmpty) return;
 
@@ -39,7 +37,7 @@ class _ChatScreen extends State<ChatScreen> {
         );
       }
     });
-  static const String _rickRollUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+  const String _rickRollUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 
   Future<void> _launchRickRoll() async {
     final Uri url = Uri.parse(_rickRollUrl);
