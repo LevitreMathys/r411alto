@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:r411alto/App.dart';
+import 'package:r411alto/screens/settings_screen.dart';
 import 'package:r411alto/screens/chat_screen.dart';
 import 'package:r411alto/screens/settings_screen.dart';
 import 'package:r411alto/services/onboarding_storage.dart';
