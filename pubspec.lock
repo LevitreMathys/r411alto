@@ -49,6 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
+  basic_utils:
+    dependency: "direct main"
+    description:
+      name: basic_utils
+      sha256: "548047bef0b3b697be19fa62f46de54d99c9019a69fb7db92c69e19d87f633c7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.8.2"
   boolean_selector:
     dependency: transitive
     description:
@@ -169,6 +177,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  dio:
+    dependency: "direct main"
+    description:
+      name: dio
+      sha256: aff32c08f92787a557dd5c0145ac91536481831a01b4648136373cddb0e64f8c
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.9.2"
+  dio_web_adapter:
+    dependency: transitive
+    description:
+      name: dio_web_adapter
+      sha256: "2f9e64323a7c3c7ef69567d5c800424a11f8337b8b228bad02524c9fb3c1f340"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.2"
   fake_async:
     dependency: transitive
     description:
@@ -225,6 +249,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.9.3+5"
+  fixnum:
+    dependency: transitive
+    description:
+      name: fixnum
+      sha256: b6dc7065e46c974bc7c5f143080a6764ec7a4be6da1285ececdc37be96de53be
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -752,6 +784,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  pointycastle:
+    dependency: "direct main"
+    description:
+      name: pointycastle
+      sha256: "92aa3841d083cc4b0f4709b5c74fd6409a3e6ba833ffc7dc6a8fee096366acf5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
   pool:
     dependency: transitive
     description:
@@ -1077,6 +1117,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.5"
+  uuid:
+    dependency: "direct main"
+    description:
+      name: uuid
+      sha256: "1fef9e8e11e2991bb773070d4656b7bd5d850967a2456cfc83cf47925ba79489"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.5.3"
   vector_math:
     dependency: transitive
     description:
