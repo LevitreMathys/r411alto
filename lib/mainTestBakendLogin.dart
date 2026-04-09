@@ -5,7 +5,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:r411alto/services/storage.service.dart';
+import 'package:r411alto/services/storage.auth.service.dart';
 import 'package:r411alto/services/image.service.dart';
 
 void main() {
@@ -18,7 +18,7 @@ class MonEcranTest extends StatefulWidget {
 }
 
 class _MonEcranTestState extends State<MonEcranTest> {
-  final StorageService _storageService = StorageService();
+  final StorageAuthService _storageService = StorageAuthService();
   final ImageService _imageService = ImageService();
 
   // Contrôleurs pour les champs de texte

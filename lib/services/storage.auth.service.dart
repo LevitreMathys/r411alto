@@ -1,7 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class StorageService {
-  /// StorageService : gestion du stockage des données de l'application.
+class StorageAuthService {
+  /// StorageAuthService : gestion du stockage des données de l'application.
 
   /// Création de l'instance du stockage.
   final _storage = const FlutterSecureStorage();
