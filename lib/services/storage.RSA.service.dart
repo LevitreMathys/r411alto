@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class StorageRsaService {
@@ -26,9 +28,35 @@ class StorageRsaService {
     await _storage.write(key: _privKey(relationId), value: privateKeyPem);
   }
 
+  String _distantPubKey(String relationId) => 'rel:$relationId:distantPubPem';
+
+  Future<void> saveDistantPublicKey(String relationId, String publicKeyPem) async {
+    await _storage.write(key: _distantPubKey(relationId), value: publicKeyPem);
+  }
+
   Future<String?> readPublicKeyPem(String relationId) =>
       _storage.read(key: _pubKey(relationId));
 
   Future<String?> readPrivateKeyPem(String relationId) =>
       _storage.read(key: _privKey(relationId));
+
+  /// Récupérer l'ID de la dernière relation enregistrée où null si pas de relation.
+  Future<int?> getLastRelationId() async {
+    final allKeys = await _storage.readAll();
+    int maxId = 0;
+
+    for (var key in allKeys.keys) {
+      if (key.startsWith('rel:')) {
+        int id = int.parse(key.split(':')[1]);
+        if (id > maxId) {
+          maxId = id;
+        }
+      }
+    }
+
+    if (maxId == 0) {
+      return null;
+    }
+    return maxId;
+  }
 }

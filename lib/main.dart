@@ -12,9 +12,11 @@ import 'screens/first_screen.dart';
 import 'screens/account_created_screen.dart';
 import 'screens/main_form_screen.dart';
 import 'screens/profil_setting_screen.dart';
-import 'screens/QR_code_screen.dart';
+import 'screens/qr_code_screen.dart';
 import 'screens/scan_qr_code_screen.dart';
 import 'screens/easter_egg.dart';
+
+const String urlBackend = "https://alto.samyn.ovh";
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
