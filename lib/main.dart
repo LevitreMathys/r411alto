@@ -68,7 +68,11 @@ final GoRouter _router = GoRouter(
       ],
     ),
 
-    GoRoute(path: "/chat", builder: (context, state) => const ChatScreen()),
+    GoRoute(
+      path: '/chat/:relationId',
+      builder: (context, state) =>
+          ChatScreen(relationId: state.pathParameters['relationId']!),
+    ),
 
     // écrans hors menu
     GoRoute(

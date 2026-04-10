@@ -1,18 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:r411alto/notifiers/contacts_notifier.dart';
 import 'package:r411alto/services/qrcodeParing.service.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class ScanQRCodeScreen extends StatefulWidget {
+class ScanQRCodeScreen extends ConsumerStatefulWidget {
   const ScanQRCodeScreen({super.key});
 
   @override
-  State<ScanQRCodeScreen> createState() => _ScanQRCodeScreenState();
+  ConsumerState<ScanQRCodeScreen> createState() => _ScanQRCodeScreenState();
 }
 
-class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
+class _ScanQRCodeScreenState extends ConsumerState<ScanQRCodeScreen> {
   final QrCodeParingService _pairingService = QrCodeParingService();
   bool _isProcessing = false;
   Timer? _pollingTimer;
@@ -39,7 +40,7 @@ class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Matching réussi, attente de la finalisation d'Alice...")),
+          const SnackBar(content: Text("Matching réussi, attente de la finalisation du contact...")),
         );
       }
 
@@ -65,16 +66,67 @@ class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
         if (status == "finalized") {
           timer.cancel();
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Pairing 100% établi !")),
-            );
-            context.pop(); // Retour à l'écran précédent
+            // Force le rafraîchissement initial
+            await ref.read(contactsProvider.notifier).refresh();
+            
+            if (mounted) {
+              _showRenameDialog(relationCodeA);
+            }
           }
         }
       } catch (e) {
-        // Ignorer les erreurs temporaires de réseau pendant le polling
+        // Ignorer les erreurs temporaires
       }
     });
+  }
+
+  Future<void> _showRenameDialog(String relationId) async {
+    final TextEditingController controller = TextEditingController();
+    
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text("Nouveau contact !"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("Comment souhaitez-vous appeler ce contact ?"),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: "Nom du contact",
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Ferme le dialogue
+              if (mounted) context.pop(); // Retour au Home
+            },
+            child: const Text("Plus tard"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final alias = controller.text.trim();
+              if (alias.isNotEmpty) {
+                await ref.read(contactsProvider.notifier).updateAlias(relationId, alias);
+              }
+              if (mounted) {
+                Navigator.of(context).pop(); // Ferme le dialogue
+                context.pop(); // Retour au Home
+              }
+            },
+            child: const Text("Enregistrer"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

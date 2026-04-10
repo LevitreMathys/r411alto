@@ -38,24 +38,41 @@ class StorageRsaService {
   Future<String?> readPrivateKeyPem(String relationId) =>
       _storage.read(key: _privKey(relationId));
 
-  /// Récupérer l'ID de la dernière relation enregistrée où null si pas de relation.
-  Future<int?> getLastRelationId() async {
+  /// Récupérer l'ID de la dernière relation enregistrée ou null si pas de relation.
+  Future<String?> getLastRelationId() async {
     final allKeys = await _storage.readAll();
-    int maxId = 0;
+    String? lastId;
 
     for (var key in allKeys.keys) {
       if (key.startsWith('rel:')) {
         final idPart = key.split(':')[1];
-        final id = int.tryParse(idPart);
-        if (id != null && id > maxId) {
-          maxId = id;
-        }
+        lastId = idPart;
       }
     }
-
-    if (maxId == 0) {
-      return null;
-    }
-    return maxId;
+    return lastId;
   }
+
+  /// Récupérer tous les identifiants de relation uniques.
+  Future<List<String>> getAllRelationIds() async {
+    final allKeys = await _storage.readAll();
+    final Set<String> ids = {};
+
+    for (var key in allKeys.keys) {
+      if (key.startsWith('rel:')) {
+        final idPart = key.split(':')[1];
+        ids.add(idPart);
+      }
+    }
+    return ids.toList();
+  }
+
+  /// Gérer l'alias (nom) du contact
+  String _aliasKey(String relationId) => 'rel:$relationId:alias';
+
+  Future<void> saveAlias(String relationId, String alias) async {
+    await _storage.write(key: _aliasKey(relationId), value: alias);
+  }
+
+  Future<String?> getAlias(String relationId) =>
+      _storage.read(key: _aliasKey(relationId));
 }
