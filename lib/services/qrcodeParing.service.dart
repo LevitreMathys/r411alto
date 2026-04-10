@@ -100,11 +100,14 @@ class QrCodeParingService {
 
     if (response.statusCode == 200) {
       final aliceData = jsonDecode(response.body);
-      // Bob sauve la clé publique d'Alice
-      await storageRsaService.saveDistantPublicKey(
-        aliceData['relationCodeA'],
-        aliceData['publicKeyA'],
+      // Bob sauve la clé publique d'Alice et son relationCodeA, associés à son propre relationCodeB local
+      await storageRsaService.saveDistantInfo(
+        relationCodeB,
+        distantRelationId: aliceData['relationCodeA'],
+        distantPublicKeyPem: aliceData['publicKeyA'],
       );
+      // Retourne aussi le local relationCodeB pour que l'UI puisse l'utiliser (ex: pour le renommage)
+      aliceData['localRelationCode'] = relationCodeB;
       return aliceData;
     }
     throw Exception("Erreur lors du matching: ${response.statusCode}");

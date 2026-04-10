@@ -27,6 +27,12 @@ class StorageRsaService {
   }
 
   String _distantPubKey(String relationId) => 'rel:$relationId:distantPubPem';
+  String _distantRelationId(String relationId) => 'rel:$relationId:distantId';
+
+  Future<void> saveDistantInfo(String localRelationId, {required String distantRelationId, required String distantPublicKeyPem}) async {
+    await _storage.write(key: _distantPubKey(localRelationId), value: distantPublicKeyPem);
+    await _storage.write(key: _distantRelationId(localRelationId), value: distantRelationId);
+  }
 
   Future<void> saveDistantPublicKey(String relationId, String publicKeyPem) async {
     await _storage.write(key: _distantPubKey(relationId), value: publicKeyPem);
@@ -37,6 +43,12 @@ class StorageRsaService {
 
   Future<String?> readPrivateKeyPem(String relationId) =>
       _storage.read(key: _privKey(relationId));
+
+  Future<String?> readDistantPublicKeyPem(String relationId) =>
+      _storage.read(key: _distantPubKey(relationId));
+
+  Future<String?> readDistantRelationId(String relationId) =>
+      _storage.read(key: _distantRelationId(relationId));
 
   /// Récupérer l'ID de la dernière relation enregistrée ou null si pas de relation.
   Future<String?> getLastRelationId() async {

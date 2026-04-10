@@ -1,33 +1,100 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:r411alto/widgets/common/HeaderAccount.dart';
-import 'package:r411alto/widgets/common/message.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:r411alto/models/contact.dart';
+import 'package:r411alto/models/message.dart';
+import 'package:r411alto/providers/service_providers.dart';
+import 'package:r411alto/widgets/common/HeaderAccount.dart';
+import 'package:r411alto/widgets/common/message.dart' as widget_msg;
 
-class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+class ChatScreen extends ConsumerStatefulWidget {
+  final String relationId;
+  const ChatScreen({super.key, required this.relationId});
 
   @override
-  State<ChatScreen> createState() => _ChatScreen();
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreen extends State<ChatScreen> {
-  final List<Map<String, dynamic>> messages = [];
+class _ChatScreenState extends ConsumerState<ChatScreen> {
+  final List<Message> _messages = [];
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  Contact? _contact;
+  Timer? _pollingTimer;
+  bool _isLoading = true;
 
-  // ✅ Déplacé ici, au niveau de la classe
-  static const String _rickRollUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+  @override
+  void initState() {
+    super.initState();
+    _loadContact();
+  }
 
-  void _sendMessage() {
-    if (_controller.text.trim().isEmpty) return;
+  Future<void> _loadContact() async {
+    final contact = await ref.read(contactServiceProvider).getContact(widget.relationId);
+    if (mounted) {
+      setState(() {
+        _contact = contact;
+        _isLoading = false;
+      });
+      if (contact != null) {
+        _startPolling();
+      }
+    }
+  }
+
+  void _startPolling() {
+    _fetchMessages();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      _fetchMessages();
+    });
+  }
+
+  Future<void> _fetchMessages() async {
+    if (_contact == null) return;
+    try {
+      final newMessages = await ref.read(messageServiceProvider).fetchMessages(_contact!);
+      if (newMessages.isNotEmpty && mounted) {
+        setState(() {
+          _messages.addAll(newMessages);
+        });
+        _scrollToBottom();
+      }
+    } catch (e) {
+      debugPrint("Erreur polling messages: $e");
+    }
+  }
+
+  void _sendMessage() async {
+    if (_controller.text.trim().isEmpty || _contact == null) return;
+
+    final content = _controller.text.trim();
+
+    final myMsg = Message(
+      key: 'MESSAGE',
+      value: content,
+      isMe: true,
+      timestamp: DateTime.now(),
+    );
 
     setState(() {
-      messages.add({"text": _controller.text.trim(), "isMe": true});
+      _messages.add(myMsg);
     });
-
     _controller.clear();
+    _scrollToBottom();
 
+    try {
+      await ref.read(messageServiceProvider).sendMessage(_contact!, 'MESSAGE', content);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erreur d'envoi: $e")),
+        );
+      }
+    }
+  }
+
+  void _scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -36,70 +103,113 @@ class _ChatScreen extends State<ChatScreen> {
           curve: Curves.easeOut,
         );
       }
-    }); // ✅ Accolade fermante de _sendMessage ajoutée
+    });
   }
 
-  Future<void> _launchRickRoll() async {
-    final Uri url = Uri.parse(_rickRollUrl);
-    if (!await launchUrl(url)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not open the Rick Roll!'),
-          ),
-        );
-      }
-    }
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (_contact == null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: Text("Contact introuvable")),
+      );
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: const Icon(Icons.arrow_back),
-                ),
-                Headeraccount(user_name: "Other user name")
-              ],
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => context.pop(),
+                    icon: const Icon(Icons.arrow_back),
+                  ),
+                  Expanded(
+                    child: Headeraccount(user_name: _contact!.displayName),
+                  ),
+                ],
+              ),
             ),
+
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                itemCount: messages.length,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                itemCount: _messages.length,
                 itemBuilder: (context, index) {
-                  final msg = messages[index];
-                  return Message(
-                    text: msg['text'],
-                    isMe: msg['isMe'],
+                  final msg = _messages[index];
+                  return widget_msg.Message(
+                    isMe: msg.isMe,
+                    text: msg.value,
                   );
                 },
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: TextField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  hintText: 'Enter your message',
-                  filled: true,
-                  fillColor: Colors.grey,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
+
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
                   ),
-                  suffixIcon: IconButton(
-                    onPressed: _sendMessage,
-                    icon: const Icon(Icons.send),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        hintText: 'Votre message...',
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      ),
+                      onSubmitted: (_) => _sendMessage(),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  CircleAvatar(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    child: IconButton(
+                      onPressed: _sendMessage,
+                      icon: const Icon(Icons.send, color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

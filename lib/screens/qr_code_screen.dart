@@ -66,16 +66,20 @@ class _QRCodeScreenState extends ConsumerState<QRCodeScreen> {
       final String relationCodeB = bobData['relationCodeB'];
       final String publicKeyB = bobData['publicKeyB'];
 
-      // Stocker la clé publique de Bob via le service injecté
+      // Stocker la clé publique de Bob et son relationCodeB, associés à notre code (relationCodeA)
       final storageRsaService = ref.read(storageRsaServiceProvider);
-      await storageRsaService.saveDistantPublicKey(relationCodeB, publicKeyB);
+      await storageRsaService.saveDistantInfo(
+        code, 
+        distantRelationId: relationCodeB, 
+        distantPublicKeyPem: publicKeyB
+      );
 
       if (mounted) {
         // Force le rafraîchissement
         await ref.read(contactsProvider.notifier).refresh();
 
         if (mounted) {
-          _showRenameDialog(relationCodeB);
+          _showRenameDialog(code);
         }
       }
     } catch (e) {

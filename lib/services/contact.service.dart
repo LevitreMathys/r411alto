@@ -12,23 +12,32 @@ class ContactService {
     final List<Contact> contacts = [];
 
     for (var id in relationIds) {
-      final alias = await _storageRsaService.getAlias(id);
-      final pubKey = await _storageRsaService.readPublicKeyPem(id);
-
-      contacts.add(Contact(relationId: id, alias: alias, publicKeyPem: pubKey));
+      final contact = await getContact(id);
+      if (contact != null) {
+        contacts.add(contact);
+      }
     }
 
     return contacts;
   }
 
-  /// Récupère un contact par son relationId.
+  /// Récupère un contact par son relationId (local).
   Future<Contact?> getContact(String relationId) async {
     final alias = await _storageRsaService.getAlias(relationId);
     final pubKey = await _storageRsaService.readPublicKeyPem(relationId);
+    final distantId = await _storageRsaService.readDistantRelationId(relationId);
+    final distantPubKey = await _storageRsaService.readDistantPublicKeyPem(relationId);
 
+    // Un contact est valide s'il a au moins une clé publique locale ou un alias
     if (pubKey == null && alias == null) return null;
 
-    return Contact(relationId: relationId, alias: alias, publicKeyPem: pubKey);
+    return Contact(
+      relationId: relationId,
+      distantRelationId: distantId,
+      alias: alias,
+      publicKeyPem: pubKey,
+      distantPublicKeyPem: distantPubKey,
+    );
   }
 
   /// Met à jour ou définit l'alias d'un contact.

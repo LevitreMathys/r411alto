@@ -16,6 +16,7 @@ class ScanQRCodeScreen extends ConsumerStatefulWidget {
 class _ScanQRCodeScreenState extends ConsumerState<ScanQRCodeScreen> {
   final QrCodeParingService _pairingService = QrCodeParingService();
   bool _isProcessing = false;
+  String? _localRelationCode;
   Timer? _pollingTimer;
 
   void _handleScan(BarcodeCapture capture) {
@@ -36,9 +37,13 @@ class _ScanQRCodeScreenState extends ConsumerState<ScanQRCodeScreen> {
   Future<void> _processPairing(String relationCodeA) async {
     try {
       // Étape 2 : Bob matche avec Alice
-      await _pairingService.match(relationCodeA);
+      final result = await _pairingService.match(relationCodeA);
       
       if (mounted) {
+        setState(() {
+          _localRelationCode = result['localRelationCode'];
+        });
+        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Matching réussi, attente de la finalisation du contact...")),
         );
@@ -69,8 +74,8 @@ class _ScanQRCodeScreenState extends ConsumerState<ScanQRCodeScreen> {
             // Force le rafraîchissement initial
             await ref.read(contactsProvider.notifier).refresh();
             
-            if (mounted) {
-              _showRenameDialog(relationCodeA);
+            if (mounted && _localRelationCode != null) {
+              _showRenameDialog(_localRelationCode!);
             }
           }
         }
