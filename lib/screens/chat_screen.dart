@@ -111,26 +111,69 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   },
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(child: Text('Error: $err')),
+                error: (err, stack) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Chat error: $err')),
+                      );
+                    }
+                  });
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error, size: 64, color: Colors.red),
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            'Error: $err',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => ref.invalidate(
+                            messagesProvider(widget.relationId),
+                          ),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
             Padding(
               padding: const EdgeInsets.all(20),
-              child: TextField(
-                controller: _controller,
-                onSubmitted: (_) => _sendMessage(),
-                decoration: InputDecoration(
-                  hintText: 'Enter your message',
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  suffixIcon: IconButton(
-                    onPressed: _sendMessage,
-                    icon: const Icon(Icons.send),
-                  ),
-                ),
+              child: Consumer(
+                builder: (context, ref2, child) {
+                  final isLoading = ref2
+                      .watch(messagesProvider(widget.relationId))
+                      .isLoading;
+                  return TextField(
+                    controller: _controller,
+                    enabled: !isLoading,
+                    onSubmitted: isLoading ? null : (_) => _sendMessage(),
+                    decoration: InputDecoration(
+                      hintText: isLoading ? 'Sending...' : 'Enter your message',
+                      filled: true,
+                      fillColor: Colors.grey[isLoading ? 300 : 200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      suffixIcon: isLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : IconButton(
+                              onPressed: _sendMessage,
+                              icon: const Icon(Icons.send),
+                            ),
+                    ),
+                  );
+                },
               ),
             ),
           ],

@@ -19,9 +19,15 @@ class MessagesNotifier extends AsyncNotifier<List<Message>> {
   Future<void> send(String plaintext) async {
     state = const AsyncLoading();
     final service = ref.read(messageServiceProvider);
-    await service.sendMessage(_relationId, plaintext);
-    final msgs = await service.loadConversation(_relationId);
-    state = AsyncData(await service.decryptConversation(_relationId, msgs));
+    try {
+      await service.sendMessage(_relationId, plaintext);
+      final msgs = await service.loadConversation(_relationId);
+      state = AsyncData(await service.decryptConversation(_relationId, msgs));
+    } catch (e, stack) {
+      print('Notifier send error for $_relationId: $e');
+      state = AsyncError(e, stack);
+      rethrow; // Optional for caller
+    }
   }
 
   void startPolling() {
