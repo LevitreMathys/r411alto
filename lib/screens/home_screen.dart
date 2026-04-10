@@ -1,110 +1,77 @@
 import 'package:flutter/material.dart';
-import '../widgets/common/Headerhomescreen.dart';
-import 'QR_code_screen.dart';
-import 'scan_qr_code_screen.dart';
-import 'relation_screen.dart';
-import '../models/pairing.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:r411alto/notifiers/contacts_notifier.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key, required this.title});
   final String title;
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  List<Relation> relations = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadRelations();
-  }
-
-  Future<void> _loadRelations() async {
-    final loaded = await Relation.listFromStorage();
-    setState(() {
-      relations = loaded;
-    });
-  }
-
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final contactsAsync = ref.watch(contactsProvider);
+
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          const Headerhomescreen(),
-          Expanded(
-            child: relations.isEmpty
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Text(
-                        "Aucune connexion établie\nCliquez pour ajouter une relation",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 18),
-                      ),
+          contactsAsync.when(
+            data: (contacts) {
+              if (contacts.isEmpty) {
+                return const Center(
+                  child: Text("Aucune connexion établie"),
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.only(
+                  top: 120, // Espace pour le Header
+                  bottom: 100, // Espace pour la FloatingBar
+                  left: 16,
+                  right: 16,
+                ),
+                itemCount: contacts.length,
+                itemBuilder: (context, index) {
+                  final contact = contacts[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _loadRelations,
-                    child: ListView.builder(
-                      itemCount: relations.length,
-                      itemBuilder: (context, index) {
-                        final rel = relations[index];
-                        return ListTile(
-                          leading: CircleAvatar(child: Text(rel.displayName)),
-                          title: Text(rel.displayName),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const RelationScreen(),
-                              ),
-                            );
-                          },
-                        );
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                        child: Text(
+                          contact.displayName[0].toUpperCase(),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        contact.displayName,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        "ID: ${contact.relationId.substring(0, 8)}...",
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      ),
+                      trailing: const Icon(Icons.chat_bubble_outline),
+                      onTap: () {
+                        context.push('/chat/${contact.relationId}');
                       },
                     ),
-                  ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.qr_code),
-                  label: const Text("Initier pairing (mon QR)"),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 60),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const QRCodeScreen(),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.qr_code_scanner),
-                  label: const Text("Scanner QR (pairing)"),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 60),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ScanQRCodeScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ],
+                  );
+                },
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, stack) => Center(
+              child: Text("Erreur lors du chargement : $err"),
             ),
           ),
         ],

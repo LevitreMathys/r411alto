@@ -1,119 +1,143 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:uuid/uuid.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:async';
-import '../crypto/key_generator.dart';
-import '../crypto/key_storage.dart';
-import '../services/pairing_service.dart';
+import 'package:r411alto/notifiers/contacts_notifier.dart';
+import 'package:r411alto/services/qrcodeParing.service.dart';
 
-class ScanQRCodeScreen extends StatefulWidget {
+class ScanQRCodeScreen extends ConsumerStatefulWidget {
   const ScanQRCodeScreen({super.key});
 
   @override
-  State<ScanQRCodeScreen> createState() => _ScanQRCodeScreenState();
+  ConsumerState<ScanQRCodeScreen> createState() => _ScanQRCodeScreenState();
 }
 
-class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
-  bool _isScanning = true;
-  bool isMatching = false;
-  String status = 'Scan QR code';
-  String? codeA;
-  Map<String, String>? keyPair;
-  StreamSubscription<StatusResponse>? _pollSub;
+class _ScanQRCodeScreenState extends ConsumerState<ScanQRCodeScreen> {
+  final QrCodeParingService _pairingService = QrCodeParingService();
+  bool _isProcessing = false;
+  String? _localRelationCode;
+  Timer? _pollingTimer;
 
   void _handleScan(BarcodeCapture capture) {
     final List<Barcode> barcodes = capture.barcodes;
+
     for (final barcode in barcodes) {
       final String? code = barcode.rawValue;
-      if (code != null && _isScanning) {
+      if (code != null && !_isProcessing) {
         setState(() {
-          _isScanning = false;
-          codeA = code;
-          status = 'QR scanné, matching...';
+          _isProcessing = true;
         });
-        _handleScanMatch(code);
+        _processPairing(code);
         break;
       }
     }
   }
 
-  Future<void> _handleScanMatch(String relationCodeA) async {
-    setState(() {
-      isMatching = true;
-      status = 'Génération clés et match...';
-    });
+  Future<void> _processPairing(String relationCodeA) async {
     try {
-      final keyPairMap = await KeyGenerator.generateRsaKeyPair();
-      final codeB = const Uuid().v4();
-      final aliceInfo = await PairingService().matchPairing(
-        relationCodeA: relationCodeA,
-        publicKeyB: keyPairMap['publicKeyPem']!,
-        relationCodeB: codeB,
-      );
-      await KeyStorage.storeKeys(
-        relationCodeA,
-        keyPairMap['publicKeyPem']!,
-        keyPairMap['privateKeyPem']!,
-      );
-      const storage = FlutterSecureStorage();
-      await storage.write(
-        key: 'peer_pub_$relationCodeA',
-        value: aliceInfo.publicKeyA,
-      );
-      setState(() {
-        keyPair = keyPairMap;
-        status = 'waiting';
-        isMatching = false;
-      });
-      _startPolling(relationCodeA);
-    } catch (e) {
-      setState(() {
-        isMatching = false;
-        status = 'Erreur match: $e';
-      });
-      if (mounted)
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Match erreur: $e')));
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() => _isScanning = true);
-      });
-    }
-  }
-
-  void _startPolling(String codeA) {
-    _pollSub = PairingService()
-        .pollUntilFinalized(codeA)
-        .listen(
-          (statusResp) {
-            if (mounted) {
-              setState(() => status = statusResp.status);
-              if (statusResp.status == 'finalized') {
-                _completePairing();
-              }
-            }
-          },
-          onError: (e) {
-            if (mounted) {
-              setState(() => status = 'Erreur polling');
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text('Polling: $e')));
-            }
-          },
+      // Étape 2 : Bob matche avec Alice
+      final result = await _pairingService.match(relationCodeA);
+      
+      if (mounted) {
+        setState(() {
+          _localRelationCode = result['localRelationCode'];
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Matching réussi, attente de la finalisation du contact...")),
         );
+      }
+
+      // Commencer le polling pour attendre que Alice finalise (Étape 4)
+      _startPolling(relationCodeA);
+
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erreur lors du matching: $e")),
+        );
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+    }
   }
 
-  void _completePairing() {
-    _pollSub?.cancel();
-    if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Pairing finalisé !')));
-      Navigator.pop(context);
-    }
+  void _startPolling(String relationCodeA) {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      try {
+        final status = await _pairingService.getStatus(relationCodeA);
+        if (status == "finalized") {
+          timer.cancel();
+          if (mounted) {
+            // Force le rafraîchissement initial
+            await ref.read(contactsProvider.notifier).refresh();
+            
+            if (mounted && _localRelationCode != null) {
+              _showRenameDialog(_localRelationCode!);
+            }
+          }
+        }
+      } catch (e) {
+        // Ignorer les erreurs temporaires
+      }
+    });
+  }
+
+  Future<void> _showRenameDialog(String relationId) async {
+    final TextEditingController controller = TextEditingController();
+    
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text("Nouveau contact !"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("Comment souhaitez-vous appeler ce contact ?"),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: "Nom du contact",
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Ferme le dialogue
+              if (mounted) context.pop(); // Retour au Home
+            },
+            child: const Text("Plus tard"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final alias = controller.text.trim();
+              if (alias.isNotEmpty) {
+                await ref.read(contactsProvider.notifier).updateAlias(relationId, alias);
+              }
+              if (mounted) {
+                Navigator.of(context).pop(); // Ferme le dialogue
+                context.pop(); // Retour au Home
+              }
+            },
+            child: const Text("Enregistrer"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -125,59 +149,75 @@ class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         title: const Text(
-          "Scan QR Pairing",
+          "Scan QR Code",
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.flashlight_on, color: Colors.white),
-            onPressed: () {
-              // Toggle flashlight
-            },
-          ),
-        ],
       ),
       body: Stack(
         children: [
-          if (_isScanning)
-            MobileScanner(onDetect: _handleScan)
-          else
-            Center(child: CircularProgressIndicator()),
+          MobileScanner(
+            onDetect: _handleScan,
+          ),
+          // Overlay with scan frame
           Center(
             child: Container(
               width: 250,
               height: 250,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.5),
+                  color: _isProcessing ? Colors.blue : Colors.white.withValues(alpha: 0.5),
                   width: 2,
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(14),
+                      ),
+                    ),
+                    child: const Text(
+                      "Positionnez le QR code dans le cadre",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
+          if (_isProcessing)
+            const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          // Instructions at bottom
           Positioned(
             bottom: 100,
             left: 0,
             right: 0,
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
+                  color: Colors.black.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(
-                  status,
-                  style: const TextStyle(color: Colors.white),
-                  textAlign: TextAlign.center,
+                child: const Text(
+                  "Le scan se fait automatiquement",
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ),
@@ -187,3 +227,4 @@ class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
     );
   }
 }
+
