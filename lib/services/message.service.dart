@@ -24,36 +24,60 @@ class MessageService {
 
   /// Send plaintext message: encrypt -> POST -> local save (decrypted, isSent=true)
   Future<void> sendMessage(String relationId, String plaintext) async {
-    final contact = await _contactService.getContact(relationId);
-    if (contact == null) throw Exception('Contact not found');
+    Message? msg;
+    bool postSuccess = false;
 
-    final pubKeyPem = contact.distantPublicKeyPem ?? contact.publicKeyPem ?? '';
-    if (pubKeyPem.isEmpty) throw Exception('No public key for contact');
+    try {
+      final contact = await _contactService.getContact(relationId);
+      if (contact == null) {
+        throw Exception('Contact not found');
+      }
 
-    final encrypted = rsaEncryptToBase64(
-      recipientPublicKeyPem: pubKeyPem,
-      plaintext: plaintext,
-    );
+      final pubKeyPem =
+          contact.distantPublicKeyPem ?? contact.publicKeyPem ?? '';
+      if (pubKeyPem.isEmpty) {
+        throw Exception('No public key');
+      }
 
-    await http.post(
-      Uri.parse('$apiBase/element'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'relationCode': relationId,
-        'key': 'MESSAGE',
-        'value': encrypted,
-      }),
-    );
+      final encrypted = rsaEncryptToBase64(
+        recipientPublicKeyPem: pubKeyPem,
+        plaintext: plaintext,
+      );
 
-    // Local save with decrypted
-    final msg = Message(
-      id: generateMessageId(),
-      encryptedContent: encrypted,
-      timestamp: DateTime.now(),
-      isSent: true,
-      decryptedContent: plaintext,
-    );
-    await _saveMessage(relationId, msg);
+      final response = await http.post(
+        Uri.parse('$apiBase/element'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'relationCode': relationId,
+          'key': 'MESSAGE',
+          'value': encrypted,
+        }),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        postSuccess = true;
+      } else {
+        throw Exception('Backend POST failed: ${response.statusCode}');
+      }
+
+      msg = Message(
+        id: generateMessageId(),
+        encryptedContent: encrypted,
+        timestamp: DateTime.now(),
+        isSent: true,
+        decryptedContent: plaintext,
+      );
+    } catch (e) {
+      msg ??= Message(
+        id: generateMessageId(),
+        encryptedContent: '',
+        timestamp: DateTime.now(),
+        isSent: false,
+        decryptedContent: plaintext,
+      );
+    }
+
+    await _saveMessage(relationId, msg!);
   }
 
   /// Poll server for new message: GET -> if new, local save (encrypted, isSent=false)
