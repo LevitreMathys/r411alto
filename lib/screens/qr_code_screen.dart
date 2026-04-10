@@ -1,21 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
+import 'package:r411alto/notifiers/contacts_notifier.dart';
+import 'package:r411alto/providers/service_providers.dart';
 import 'package:r411alto/services/qrcodeParing.service.dart';
-import 'package:r411alto/services/storage.RSA.service.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class QRCodeScreen extends StatefulWidget {
+class QRCodeScreen extends ConsumerStatefulWidget {
   const QRCodeScreen({super.key});
 
   @override
-  State<QRCodeScreen> createState() => _QRCodeScreenState();
+  ConsumerState<QRCodeScreen> createState() => _QRCodeScreenState();
 }
 
-class _QRCodeScreenState extends State<QRCodeScreen> {
+class _QRCodeScreenState extends ConsumerState<QRCodeScreen> {
   final QrCodeParingService _pairingService = QrCodeParingService();
-  final StorageRsaService _storageRsaService = StorageRsaService(const FlutterSecureStorage());
   String? _relationCode;
   Timer? _pollingTimer;
   bool _isLoading = true;
@@ -47,10 +47,14 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
 
   void _startPolling(String code) {
     _pollingTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
-      final status = await _pairingService.getStatus(code);
-      if (status == "completed") {
-        timer.cancel();
-        _finalizePairing(code);
+      try {
+        final status = await _pairingService.getStatus(code);
+        if (status == "completed") {
+          timer.cancel();
+          _finalizePairing(code);
+        }
+      } catch (e) {
+        // Ignorer les erreurs temporaires
       }
     });
   }
@@ -62,14 +66,17 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
       final String relationCodeB = bobData['relationCodeB'];
       final String publicKeyB = bobData['publicKeyB'];
 
-      // Stocker la clé publique de Bob
-      await _storageRsaService.saveDistantPublicKey(relationCodeB, publicKeyB);
+      // Stocker la clé publique de Bob via le service injecté
+      final storageRsaService = ref.read(storageRsaServiceProvider);
+      await storageRsaService.saveDistantPublicKey(relationCodeB, publicKeyB);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Pairing réussi avec succès !")),
-        );
-        context.pop(); // Retour à l'écran précédent
+        // Force le rafraîchissement
+        await ref.read(contactsProvider.notifier).refresh();
+
+        if (mounted) {
+          _showRenameDialog(relationCodeB);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -78,6 +85,55 @@ class _QRCodeScreenState extends State<QRCodeScreen> {
         );
       }
     }
+  }
+
+  Future<void> _showRenameDialog(String relationId) async {
+    final TextEditingController controller = TextEditingController();
+    
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text("Connexion établie !"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("Comment souhaitez-vous appeler ce nouveau contact ?"),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: "Nom du contact",
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (mounted) context.pop();
+            },
+            child: const Text("Plus tard"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final alias = controller.text.trim();
+              if (alias.isNotEmpty) {
+                await ref.read(contactsProvider.notifier).updateAlias(relationId, alias);
+              }
+              if (mounted) {
+                Navigator.of(context).pop();
+                context.pop();
+              }
+            },
+            child: const Text("Enregistrer"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
