@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:r411alto/services/qrcodeParing.service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ScanQRCodeScreen extends StatefulWidget {
   const ScanQRCodeScreen({super.key});
@@ -10,98 +13,74 @@ class ScanQRCodeScreen extends StatefulWidget {
 }
 
 class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
-  bool _hasScanned = false;
+  final QrCodeParingService _pairingService = QrCodeParingService();
+  bool _isProcessing = false;
+  Timer? _pollingTimer;
 
   void _handleScan(BarcodeCapture capture) {
     final List<Barcode> barcodes = capture.barcodes;
 
     for (final barcode in barcodes) {
       final String? code = barcode.rawValue;
-      if (code != null && !_hasScanned) {
+      if (code != null && !_isProcessing) {
         setState(() {
-          _hasScanned = true;
+          _isProcessing = true;
         });
-        _showScannedDialog(code);
+        _processPairing(code);
         break;
       }
     }
   }
 
-  void _showScannedDialog(String code) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("QR Code Scanned!"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Data found:"),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                code,
-                style: const TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 14,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Check if it's a valid r411alto URL
-            if (code.startsWith('r411alto://')) ...[
-              const Text(
-                "This appears to be a valid r411alto link!",
-                style: TextStyle(color: Colors.green),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              context.pop();
-              // Allow scanning again after a delay
-              Future.delayed(const Duration(seconds: 5), () {
-                if (mounted) {
-                  setState(() {
-                    _hasScanned = false;
-                  });
-                }
-              });
-            },
-            child: const Text("Scan Again"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              context.pop();
-              // Navigate based on the scanned data
-              _navigateBasedOnCode(code);
-            },
-            child: const Text("Open"),
-          ),
-        ],
-      ),
-    );
+  Future<void> _processPairing(String relationCodeA) async {
+    try {
+      // Étape 2 : Bob matche avec Alice
+      await _pairingService.match(relationCodeA);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Matching réussi, attente de la finalisation d'Alice...")),
+        );
+      }
+
+      // Commencer le polling pour attendre que Alice finalise (Étape 4)
+      _startPolling(relationCodeA);
+
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erreur lors du matching: $e")),
+        );
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+    }
   }
 
-  void _navigateBasedOnCode(String code) {
-    // Example navigation logic based on scanned QR code
-    if (code.startsWith('r411alto://user/profile?id=')) {
-      final userId = code.split('id=').last;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Navigating to user profile: $userId")),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Opening: $code")),
-      );
-    }
+  void _startPolling(String relationCodeA) {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      try {
+        final status = await _pairingService.getStatus(relationCodeA);
+        if (status == "finalized") {
+          timer.cancel();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Pairing 100% établi !")),
+            );
+            context.pop(); // Retour à l'écran précédent
+          }
+        }
+      } catch (e) {
+        // Ignorer les erreurs temporaires de réseau pendant le polling
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -120,14 +99,6 @@ class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.flashlight_on, color: Colors.white),
-            onPressed: () {
-              // Toggle flashlight if supported
-            },
-          ),
-        ],
       ),
       body: Stack(
         children: [
@@ -141,7 +112,7 @@ class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
               height: 250,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: _isProcessing ? Colors.blue : Colors.white.withValues(alpha: 0.5),
                   width: 2,
                 ),
                 borderRadius: BorderRadius.circular(16),
@@ -161,7 +132,7 @@ class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
                     child: const Text(
                       "Positionnez le QR code dans le cadre",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
                       ),
@@ -171,6 +142,10 @@ class _ScanQRCodeScreenState extends State<ScanQRCodeScreen> {
               ),
             ),
           ),
+          if (_isProcessing)
+            const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
           // Instructions at bottom
           Positioned(
             bottom: 100,

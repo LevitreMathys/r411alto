@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class StorageRsaService {
@@ -47,8 +45,9 @@ class StorageRsaService {
 
     for (var key in allKeys.keys) {
       if (key.startsWith('rel:')) {
-        int id = int.parse(key.split(':')[1]);
-        if (id > maxId) {
+        final idPart = key.split(':')[1];
+        final id = int.tryParse(idPart);
+        if (id != null && id > maxId) {
           maxId = id;
         }
       }
